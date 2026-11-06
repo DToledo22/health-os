@@ -92,22 +92,22 @@ th:first-child,td:first-child{text-align:left}
 
     <div class="grid">
       <div class="card wide">
-        <h2>Recovery</h2><div class="sub">Daily recovery score with 7-day average. Green ≥ 67, yellow 34–66, red &lt; 34.</div>
+        <h2>Recovery</h2><div class="sub">Recovery score with 7-day average. Green ≥ 67, yellow 34–66, red &lt; 34.<span class="gran"></span></div>
         <div class="legend"><span><i style="background:var(--s1)"></i>Recovery</span><span><i style="background:var(--ink2)"></i>7-day avg</span></div>
         <div class="chart" id="cRecovery"><canvas></canvas></div>
       </div>
       <div class="card">
-        <h2>Heart rate variability</h2><div class="sub">ms · with 7-day and 30-day baselines</div>
+        <h2>Heart rate variability</h2><div class="sub">ms · with 7-day and 30-day baselines<span class="gran"></span></div>
         <div class="legend"><span><i style="background:var(--s1)"></i>HRV</span><span><i style="background:var(--ink2)"></i>7d</span><span><i style="background:var(--muted)"></i>30d</span></div>
         <div class="chart" id="cHrv"><canvas></canvas></div>
       </div>
       <div class="card">
-        <h2>Resting heart rate</h2><div class="sub">bpm · with 7-day and 30-day baselines</div>
+        <h2>Resting heart rate</h2><div class="sub">bpm · with 7-day and 30-day baselines<span class="gran"></span></div>
         <div class="legend"><span><i style="background:var(--s2)"></i>RHR</span><span><i style="background:var(--ink2)"></i>7d</span><span><i style="background:var(--muted)"></i>30d</span></div>
         <div class="chart" id="cRhr"><canvas></canvas></div>
       </div>
       <div class="card wide">
-        <h2>Sleep</h2><div class="sub">Hours by stage · line = sleep need</div>
+        <h2>Sleep</h2><div class="sub">Hours by stage · line = sleep need<span class="gran"></span></div>
         <div class="legend"><span><i style="background:var(--s1)"></i>Light</span><span><i style="background:var(--s2)"></i>Deep (SWS)</span><span><i style="background:var(--s3)"></i>REM</span><span><i style="background:var(--neutral)"></i>Awake</span><span><i style="background:var(--ink2)"></i>Need</span></div>
         <div class="chart tall" id="cSleep"><canvas></canvas></div>
       </div>
@@ -182,6 +182,16 @@ function inRange() {
   const c = cutoff.toISOString().slice(0, 10);
   return DAYS.filter(r => r.day >= c);
 }
+const NUMERIC = ["strain","recovery_score","rhr","hrv_rmssd_ms","performance_pct","asleep_ms","light_ms","sws_ms","rem_ms","awake_ms","need_baseline_ms","need_debt_ms","need_strain_ms","recovery_7d","hrv_7d","hrv_30d","rhr_7d","rhr_30d"];
+function weekStart(day) { const d = new Date(day + "T12:00:00"); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return d.toISOString().slice(0, 10); }
+function bucketWeekly(rows) {
+  const w = {}; rows.forEach(r => (w[weekStart(r.day)] ||= []).push(r));
+  return Object.entries(w).sort((a, b) => a[0].localeCompare(b[0])).map(([day, rs]) => {
+    const o = { day, n: rs.length, workout_count: rs.reduce((a, r) => a + (+r.workout_count || 0), 0) };
+    NUMERIC.forEach(k => o[k] = avg(rs, k)); return o;
+  });
+}
+function chartRows(rows) { return (!range || range >= 180) ? bucketWeekly(rows) : rows; }
 function avg(arr, k) { const v = arr.map(r => r[k]).filter(x => x != null).map(Number); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; }
 
 // ---------- render ----------
@@ -191,13 +201,15 @@ function render() {
   if (!latest) return;
   const base = DAYS.slice(-31, -1); // prior 30 days
   tiles(latest, base);
-  recoveryChart(rows); hrvChart(rows); rhrChart(rows); sleepChart(rows); scatterChart(rows); workoutChart(rows); weeklyTable(rows);
+  const cr = chartRows(rows), weekly = cr !== rows;
+  document.querySelectorAll(".gran").forEach(e => e.textContent = weekly ? " · weekly averages" : "");
+  recoveryChart(cr); hrvChart(cr); rhrChart(cr); sleepChart(cr); scatterChart(rows); workoutChart(rows); weeklyTable(rows);
 }
 function delta(el, cur, ref, unit, upGood, digits = 0) {
   if (cur == null || ref == null) { el.textContent = ""; return; }
   const d = cur - ref, pct = ref ? (d / ref) * 100 : 0;
   el.textContent = `${d >= 0 ? "+" : ""}${d.toFixed(digits)}${unit} vs 30d avg (${pct >= 0 ? "+" : ""}${pct.toFixed(0)}%)`;
-  el.className = "delta " + (Math.abs(pct) < 2 ? "" : (d > 0) === upGood ? "good" : "bad");
+  el.className = "delta " + (upGood == null || Math.abs(pct) < 2 ? "" : (d > 0) === upGood ? "good" : "bad");
 }
 function tiles(l, base) {
   $("#leadLabel").textContent = "Recovery · " + new Date(l.day + "T12:00:00").toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
@@ -207,7 +219,7 @@ function tiles(l, base) {
   $("#tRhr").textContent = fmt0(l.rhr) + " bpm"; delta($("#dRhr"), +l.rhr, avg(base, "rhr"), " bpm", false);
   const sh = H(l.asleep_ms); $("#tSleep").textContent = sh == null ? "–" : `${Math.floor(sh)}h ${Math.round((sh % 1) * 60)}m`;
   delta($("#dSleep"), sh, H(avg(base, "asleep_ms")), " h", true, 1);
-  $("#tStrain").textContent = fmt1(l.strain); delta($("#dStrain"), +l.strain, avg(base, "strain"), "", true, 1);
+  $("#tStrain").textContent = fmt1(l.strain); delta($("#dStrain"), +l.strain, avg(base, "strain"), "", null, 1);
 }
 
 Chart.defaults.font.family = "system-ui,-apple-system,'Segoe UI',sans-serif";
@@ -222,7 +234,7 @@ const common = () => ({
   },
 });
 const line = (data, color, extra = {}) => ({ type: "line", data, borderColor: color, borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointHoverBackgroundColor: color, pointHoverBorderColor: css("--surface"), pointHoverBorderWidth: 2, tension: 0.25, spanGaps: true, ...extra });
-const labels = (rows) => rows.map(r => r.day.slice(5));
+const labels = (rows) => rows.map(r => r.day.slice(rows.length > 60 ? 2 : 5));
 function draw(id, cfg) { if (charts[id]) charts[id].destroy(); charts[id] = new Chart($(id + " canvas"), cfg); }
 
 function recoveryChart(rows) {
