@@ -435,7 +435,7 @@ Chart.defaults.font.family = "Inter, system-ui, sans-serif"; Chart.defaults.font
 const grad = (color, a1 = 0.35, a2 = 0) => (ctx) => { const { chart } = ctx; const area = chart.chartArea; if (!area) return "transparent"; const g = chart.ctx.createLinearGradient(0, area.top, 0, area.bottom); g.addColorStop(0, hexA(color, a1)); g.addColorStop(1, hexA(color, a2)); return g; };
 function hexA(hex, a) { const h = hex.replace("#", ""); const n = parseInt(h.length === 3 ? h.split("").map(c => c + c).join("") : h, 16); return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`; }
 const common = () => ({
-  responsive: true, maintainAspectRatio: false, animation: { duration: 350 },
+  responsive: true, maintainAspectRatio: false, animation: false,
   interaction: { mode: "index", intersect: false },
   plugins: { legend: { display: false }, tooltip: { backgroundColor: css("--tip"), titleColor: "#fff", bodyColor: "#e5e7eb", padding: 10, cornerRadius: 8, displayColors: true, boxPadding: 4, usePointStyle: true, titleFont: { weight: "600" } } },
   scales: {
