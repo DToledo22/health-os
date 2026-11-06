@@ -61,8 +61,8 @@ h2{font-size:14px;font-weight:600;margin:0;letter-spacing:-.1px}
 .eyebrow{font-size:12px;color:var(--muted);font-weight:500}
 .zoneName{font-size:24px;font-weight:800;letter-spacing:-.5px;margin:2px 0 6px;color:var(--zone,var(--ink))}
 .today p{margin:0 0 12px;color:var(--ink2);font-size:13.5px;max-width:46ch}
-.target{display:inline-flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:12.5px;color:var(--ink2)}
-.target b{color:var(--ink);font-size:15px;font-weight:700}
+.target{display:inline-flex;align-items:center;flex-wrap:wrap;gap:6px 8px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:12.5px;color:var(--ink2)}
+.target b{color:var(--ink);font-size:15px;font-weight:700;white-space:nowrap}
 .tile{display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden}
 .tile .lbl{font-size:12px;color:var(--muted);font-weight:500}
 .tile .v{font-size:26px;font-weight:700;letter-spacing:-.8px;line-height:1.1}
@@ -78,7 +78,8 @@ h2{font-size:14px;font-weight:600;margin:0;letter-spacing:-.1px}
 .story{margin:12px 0}
 .story .head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .story .head .sub{margin:0}
-.insights{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.insights{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media (min-width:1100px){.insights{grid-template-columns:repeat(4,1fr)}}
 .ins{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;border-left:3px solid var(--tone,var(--line2))}
 .ins .k{font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);font-weight:600}
 .ins .t{font-size:14px;font-weight:650;letter-spacing:-.1px}
@@ -227,7 +228,7 @@ const zoneColor = (r) => { const z = zoneOf(r); return z ? css("--" + z) : css("
 const mean = (a) => { const v = a.filter(x => x != null && !isNaN(x)).map(Number); return v.length ? v.reduce((s, x) => s + x, 0) / v.length : null; };
 const sd = (a) => { const v = a.filter(x => x != null && !isNaN(x)).map(Number); if (v.length < 2) return null; const m = mean(v); return Math.sqrt(v.reduce((s, x) => s + (x - m) ** 2, 0) / (v.length - 1)); };
 const avg = (rows, k) => mean(rows.map(r => r[k]));
-const needMs = (r) => r.need_baseline_ms == null ? null : (+r.need_baseline_ms + (+r.need_debt_ms || 0) + (+r.need_strain_ms || 0) - (+r.need_nap_ms || 0));
+const needMs = (r) => r.need_baseline_ms == null ? null : (+r.need_baseline_ms + (+r.need_debt_ms || 0) + (+r.need_strain_ms || 0) + (+r.need_nap_ms || 0));
 const dayDiff = (a, b) => Math.round((new Date(b + "T12:00:00") - new Date(a + "T12:00:00")) / 86400000);
 const fmtDay = (d) => new Date(d + "T12:00:00").toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
 const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -408,7 +409,7 @@ function story(latest) {
       top.length >= 2 ? `Your mix skews ${top[0][0]}. If recovery is the goal, <b>make one ${top[0][0]} session a week a zone-2 ${top.find(([k]) => /walk|run|cycl|swim|hik/.test(k))?.[0] || "cardio"} day</b>.` : `Add one low-intensity aerobic session a week — it raises HRV baseline over time.`, null);
   }
 
-  $("#insights").innerHTML = ins.slice(0, 6).map(i => `<div class="ins" style="--tone:${i.tone ? `var(--${i.tone})` : "var(--line2)"}"><div class="k">${i.k}</div><div class="t">${i.t}</div><p class="b">${i.b}</p><p class="a">${i.a}</p></div>`).join("");
+  $("#insights").innerHTML = ins.slice(0, 8).map(i => `<div class="ins" style="--tone:${i.tone ? `var(--${i.tone})` : "var(--line2)"}"><div class="k">${i.k}</div><div class="t">${i.t}</div><p class="b">${i.b}</p><p class="a">${i.a}</p></div>`).join("");
 
   // drivers: avg recovery by condition
   const drv = [];
@@ -444,7 +445,7 @@ const common = () => ({
   },
 });
 const line = (data, color, extra = {}) => ({ type: "line", data, borderColor: color, borderWidth: 2, pointRadius: 0, pointHitRadius: 12, pointHoverRadius: 5, pointHoverBackgroundColor: color, pointHoverBorderColor: css("--panel"), pointHoverBorderWidth: 2, tension: 0.35, spanGaps: true, ...extra });
-const labels = (rows) => rows.map(r => { const d = new Date(r.day + "T12:00:00"); return rows.length > 60 ? d.toLocaleDateString([], { month: "short", year: "2-digit" }) : d.toLocaleDateString([], { month: "short", day: "numeric" }); });
+const labels = (rows) => { const span = rows.length ? dayDiff(rows[0].day, rows[rows.length - 1].day) : 0; return rows.map(r => { const d = new Date(r.day + "T12:00:00"); return span > 400 ? d.toLocaleDateString([], { month: "short", year: "2-digit" }).replace(" ", " ’") : d.toLocaleDateString([], { month: "short", day: "numeric" }); }); };
 function draw(id, cfg) { if (charts[id]) charts[id].destroy(); charts[id] = new Chart($(id + " canvas"), cfg); }
 const kpi = (el, html) => { $(el).innerHTML = html; };
 
@@ -501,7 +502,7 @@ function workoutChart(rows) {
   if (items.length > 7) { const rest = items.slice(6).reduce((a, [, n]) => a + n, 0); items = [...items.slice(0, 6), ["other", rest]]; }
   const total = items.reduce((a, [, n]) => a + n, 0), weeks = Math.max(1, Math.round(rows.length / 7));
   kpi("#kWork", `<b>${total}</b> sessions · ${(total / weeks).toFixed(1)}/wk`);
-  const o = common(); o.indexAxis = "y"; o.scales.x.grid = { color: css("--grid") }; o.scales.y.grid = { display: false }; o.scales.x.ticks.precision = 0; o.interaction = { mode: "nearest", axis: "y", intersect: false };
+  const o = common(); o.indexAxis = "y"; o.scales.x.grid = { color: css("--grid") }; o.scales.y.grid = { display: false }; o.scales.y.ticks.autoSkip = false; o.scales.x.ticks.precision = 0; o.interaction = { mode: "nearest", axis: "y", intersect: false };
   draw("#cWorkouts", { type: "bar", data: { labels: items.map(i => i[0]), datasets: [{ data: items.map(i => i[1]), backgroundColor: hexA(css("--accent"), 0.85), hoverBackgroundColor: css("--accent"), borderRadius: 5, borderSkipped: false, maxBarThickness: 16 }] }, options: o });
 }
 function weeklyTable(rows) {
@@ -509,7 +510,8 @@ function weeklyTable(rows) {
   const tb = $("#weekly tbody"); tb.innerHTML = "";
   Object.entries(weeks).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 26).forEach(([k, rs]) => {
     const rec = avg(rs, "recovery_score");
-    tb.insertAdjacentHTML("beforeend", `<tr><td>${new Date(k + "T12:00:00").toLocaleDateString([], { month: "short", day: "numeric", year: "2-digit" })}</td><td>${rs.length}</td><td><span class="dot" style="background:${zoneColor(rec)}"></span>${f0(rec)}</td><td>${f0(avg(rs, "hrv_rmssd_ms"))}</td><td>${f0(avg(rs, "rhr"))}</td><td>${f1(avg(rs, "strain"))}</td><td>${hm(H(avg(rs, "asleep_ms")))}</td><td>${f0(avg(rs, "performance_pct"))}%</td><td>${rs.reduce((a, r) => a + (+r.workout_count || 0), 0)}</td></tr>`);
+    const wk = new Date(k + "T12:00:00"), lab = wk.toLocaleDateString([], { month: "short", day: "numeric", ...(wk.getFullYear() !== new Date().getFullYear() ? { year: "numeric" } : {}) });
+    tb.insertAdjacentHTML("beforeend", `<tr><td>${lab}</td><td>${rs.length}</td><td><span class="dot" style="background:${zoneColor(rec)}"></span>${f0(rec)}</td><td>${f0(avg(rs, "hrv_rmssd_ms"))}</td><td>${f0(avg(rs, "rhr"))}</td><td>${f1(avg(rs, "strain"))}</td><td>${hm(H(avg(rs, "asleep_ms")))}</td><td>${f0(avg(rs, "performance_pct"))}%</td><td>${rs.reduce((a, r) => a + (+r.workout_count || 0), 0)}</td></tr>`);
   });
 }
 </script>
