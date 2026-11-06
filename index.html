@@ -172,6 +172,27 @@ th:first-child,td:first-child{text-align:left}
       <div class="foot">Patterns from your own history, not medical advice. Comparisons need ≥ 5 days in each group to be shown.</div>
     </section>
 
+    <section class="card story" id="training">
+      <div class="head"><h2>Training analysis</h2><span class="sub" id="trainScope"></span></div>
+      <div class="insights" id="trainInsights" style="margin-bottom:14px"></div>
+      <div class="grid" style="margin-bottom:12px">
+        <div class="drv">
+          <h3>Training load ratio — this week vs. your 4-week norm</h3>
+          <div class="sub" style="margin-bottom:6px">7-day strain ÷ 28-day weekly average. Shaded band 0.8–1.3 is the sweet spot; above it is a spike.<span class="gran"></span></div>
+          <div class="chart" id="cAcwr" style="height:220px"><canvas></canvas></div>
+        </div>
+        <div class="drv">
+          <h3>Time of day — what happens the night after</h3>
+          <div class="sub" style="margin-bottom:10px">Sessions grouped by local start time</div>
+          <div class="bars" id="todBars"></div>
+        </div>
+      </div>
+      <div class="drv"><h3>By activity — the morning after</h3>
+        <div style="overflow:auto"><table id="actTable"><thead><tr><th>Activity</th><th>Sessions</th><th>Avg strain</th><th>Duration</th><th>Avg HR</th><th>Next-day recovery</th><th>vs rest days</th><th>Green next day</th><th>Sleep perf after</th></tr></thead><tbody></tbody></table></div>
+        <div class="foot">"Rest days" = days with no logged session, used as the baseline. Activities need ≥ 8 sessions in the window to appear.</div>
+      </div>
+    </section>
+
     <div class="grid">
       <div class="card wide">
         <div class="ch"><div><h2>Recovery</h2><div class="sub">Green ≥ 67 · yellow 34–66 · red &lt; 34<span class="gran"></span></div></div><div class="kpi" id="kRec"></div></div>
@@ -255,7 +276,7 @@ async function boot() {
   $("#auth").classList.add("hidden"); $("#app").classList.remove("hidden"); $("#signout").classList.remove("hidden");
   const [d, w, s] = await Promise.all([
     sb.from("daily_with_baselines").select("*").order("day", { ascending: true }).limit(5000),
-    sb.from("workouts").select("start_at,end_at,sport_name,strain,avg_hr,max_hr,kilojoule").order("start_at", { ascending: true }).limit(5000),
+    sb.from("workouts").select("start_at,end_at,tz_offset,sport_name,strain,avg_hr,max_hr,kilojoule,score_state").order("start_at", { ascending: true }).limit(5000),
     sb.from("sync_log").select("ran_at,ok").eq("ok", true).order("ran_at", { ascending: false }).limit(1),
   ]);
   if (d.error) { $("#app").innerHTML = `<p>Could not load data: ${d.error.message}</p>`; return; }
@@ -275,6 +296,7 @@ function render() {
   const base = DAYS.slice(-31, -1);
   hero(latest, base);
   story(latest);
+  training(rows);
   const cr = chartRows(rows), weekly = cr !== rows;
   document.querySelectorAll(".gran").forEach(e => e.textContent = weekly ? " · weekly averages" : "");
   recoveryChart(cr, rows); hrvChart(cr, rows); rhrChart(cr, rows); sleepChart(cr, rows); scatterChart(rows); workoutChart(rows); weeklyTable(rows);
@@ -422,6 +444,87 @@ function story(latest) {
   const bar = (lab, v, k) => `<div class="bar"><span class="lab">${lab}</span><div class="trk"><div class="fil" style="width:${Math.max(2, v)}%;--fill:${zoneColor(v)}"></div></div><span class="n">${f0(v)} <small>n=${k}</small></span></div>`;
   $("#drivers").innerHTML = drv.length ? `<div class="drv" style="grid-column:1/-1"><h3>Average recovery under different conditions</h3><div class="bars" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px 28px">${drv.map(d => bar(d.a[0], d.a[1], d.a[2]) + bar(d.b[0], d.b[1], d.b[2])).join("")}</div></div>` : "";
 }
+
+// ---- training analysis ----
+function tzMin(off) { if (!off || off === "Z") return 0; const m = /([+-])(\d\d):(\d\d)/.exec(off); return m ? (m[1] === "-" ? -1 : 1) * (+m[2] * 60 + +m[3]) : 0; }
+function localHour(iso, off) { return new Date(new Date(iso).getTime() + tzMin(off) * 60000).getUTCHours(); }
+let _wmap = null;
+function workoutMap() { // attach each workout to the day-row (cycle) it happened in, plus the next morning's row
+  if (_wmap) return _wmap;
+  const out = []; let j = 0;
+  const ws = [...WORKOUTS].filter(w => w.score_state !== "PENDING_SCORE").sort((a, b) => a.start_at.localeCompare(b.start_at));
+  for (const w of ws) {
+    while (j < DAYS.length - 1 && DAYS[j].end_at && DAYS[j].end_at <= w.start_at) j++;
+    const cur = DAYS[j]; if (!cur || w.start_at < cur.start_at) continue;
+    const nxt = DAYS[j + 1] && dayDiff(cur.day, DAYS[j + 1].day) === 1 ? DAYS[j + 1] : null;
+    out.push({ w, cur, nxt, hour: localHour(w.start_at, w.tz_offset), mins: w.end_at ? (new Date(w.end_at) - new Date(w.start_at)) / 60000 : null, sport: (w.sport_name || "other").replace(/_/g, " ") });
+  }
+  return _wmap = out;
+}
+function acwrSeries(rows) { // 7-day strain sum vs 28-day weekly average, computed on the full history then sliced
+  const strain = DAYS.map(r => +r.strain || 0), out = new Map();
+  for (let i = 0; i < DAYS.length; i++) {
+    const s7 = strain.slice(Math.max(0, i - 6), i + 1).reduce((a, b) => a + b, 0);
+    const w28 = strain.slice(Math.max(0, i - 27), i + 1); const s28 = w28.reduce((a, b) => a + b, 0) / w28.length * 7;
+    out.set(DAYS[i].day, i >= 13 && s28 > 0 ? s7 / s28 : null);
+  }
+  return rows.map(r => out.get(r.day) ?? null);
+}
+function training(rows) {
+  const all = workoutMap();
+  const inRange = all.filter(x => x.cur.day >= rows[0].day);
+  const useAll = inRange.length < 60; const set = useAll ? all : inRange;
+  const scope = useAll ? "all " + all.length + " sessions (range has too few to split by activity)" : set.length + " sessions in range";
+  $("#trainScope").textContent = "Based on " + scope;
+  // baseline: rest days -> next morning
+  const rest = []; for (let i = 0; i < DAYS.length - 1; i++) { const a = DAYS[i], b = DAYS[i + 1]; if ((useAll || a.day >= rows[0].day) && (+a.workout_count || 0) === 0 && dayDiff(a.day, b.day) === 1 && b.recovery_score != null) rest.push(+b.recovery_score); }
+  const restRec = mean(rest);
+  // by activity
+  const per = {}; set.forEach(x => (per[x.sport] ||= []).push(x));
+  const acts = Object.entries(per).map(([k, xs]) => { const nx = xs.filter(x => x.nxt && x.nxt.recovery_score != null); return { k, n: xs.length, strain: mean(xs.map(x => x.w.strain)), mins: mean(xs.map(x => x.mins)), hr: mean(xs.map(x => x.w.avg_hr)), recNext: mean(nx.map(x => +x.nxt.recovery_score)), green: nx.length ? nx.filter(x => +x.nxt.recovery_score >= 67).length / nx.length : null, sleepPerf: mean(nx.map(x => x.nxt.performance_pct)), nNext: nx.length }; })
+    .filter(a => a.n >= 8 && a.nNext >= 5).sort((a, b) => b.n - a.n);
+  const tb = $("#actTable tbody"); tb.innerHTML = "";
+  const row = (a, cls = "") => `<tr class="${cls}"><td>${a.k}</td><td>${a.n}</td><td>${f1(a.strain)}</td><td>${a.mins == null ? "–" : Math.round(a.mins) + " min"}</td><td>${f0(a.hr)}</td><td><span class="dot" style="background:${zoneColor(a.recNext)}"></span>${f0(a.recNext)}</td><td>${a.delta == null ? "–" : (a.delta >= 0 ? "+" : "") + f0(a.delta)}</td><td>${a.green == null ? "–" : Math.round(a.green * 100) + "%"}</td><td>${f0(a.sleepPerf)}%</td></tr>`;
+  acts.forEach(a => a.delta = restRec != null && a.recNext != null ? a.recNext - restRec : null);
+  tb.innerHTML = acts.map(a => row(a)).join("") + (restRec != null ? row({ k: "Rest days (baseline)", n: rest.length, strain: null, mins: null, hr: null, recNext: restRec, delta: null, green: rest.filter(r => r >= 67).length / rest.length, sleepPerf: null }, "") : "");
+  // time of day
+  const slots = [["Morning", x => x.hour < 11], ["Midday", x => x.hour >= 11 && x.hour < 17], ["Evening", x => x.hour >= 17]].map(([lab, f]) => { const xs = set.filter(f), nx = xs.filter(x => x.nxt); return { lab, n: xs.length, sleep: H(mean(nx.map(x => x.nxt.asleep_ms))), rec: mean(nx.map(x => x.nxt.recovery_score)), perf: mean(nx.map(x => x.nxt.performance_pct)) }; }).filter(s => s.n >= 8);
+  const maxS = Math.max(...slots.map(s => s.sleep || 0), 1);
+  $("#todBars").innerHTML = slots.map(s => `<div class="bar" style="grid-template-columns:120px 1fr 120px"><span class="lab">${s.lab} <small>n=${s.n}</small></span><div class="trk"><div class="fil" style="width:${(s.sleep || 0) / maxS * 100}%;--fill:var(--sl2)"></div></div><span class="n" style="text-align:left">${hm(s.sleep)} <small>sleep · rec ${f0(s.rec)}</small></span></div>`).join("") || `<div class="sub">Not enough sessions yet.</div>`;
+  // ACWR chart
+  const cr = chartRows(rows), ratio = acwrSeries(rows); const series = cr === rows ? ratio : bucketWeeklyVals(rows, ratio);
+  const o = common(); o.scales.y.min = 0; o.scales.y.suggestedMax = 1.8; o.scales.y.ticks.callback = (v) => v.toFixed(1) + "×";
+  o.plugins.tooltip.callbacks = { label: (i) => ` load ratio ${i.raw == null ? "–" : (+i.raw).toFixed(2)}×` };
+  const band = { id: "band", beforeDatasetsDraw(c) { const { ctx, chartArea: a, scales: { y } } = c; ctx.save(); ctx.fillStyle = hexA(css("--good"), 0.10); ctx.fillRect(a.left, y.getPixelForValue(1.3), a.right - a.left, y.getPixelForValue(0.8) - y.getPixelForValue(1.3)); ctx.restore(); } };
+  if (charts["#cAcwr"]) charts["#cAcwr"].destroy();
+  charts["#cAcwr"] = new Chart($("#cAcwr canvas"), { data: { labels: labels(cr), datasets: [line(series, css("--strain"), { backgroundColor: grad(css("--strain"), 0.25), fill: true, segment: { borderColor: (c) => c.p1.parsed.y > 1.3 ? css("--bad") : undefined } })] }, options: o, plugins: [band] });
+  // insights
+  const ins = [];
+  const latestRatio = [...acwrSeries(DAYS)].reverse().find(v => v != null);
+  const allRatio = acwrSeries(DAYS); const spikeDays = DAYS.filter((r, i) => allRatio[i] > 1.3 && r.recovery_score != null), normDays = DAYS.filter((r, i) => allRatio[i] != null && allRatio[i] <= 1.3 && allRatio[i] >= 0.8 && r.recovery_score != null);
+  if (latestRatio != null && spikeDays.length >= 10) {
+    const redS = spikeDays.filter(r => +r.recovery_score < 34).length / spikeDays.length, redN = normDays.filter(r => +r.recovery_score < 34).length / normDays.length;
+    ins.push({ k: "Load management", t: latestRatio > 1.3 ? `You're in a load spike right now (${latestRatio.toFixed(2)}×)` : latestRatio < 0.8 ? `Training load is low this week (${latestRatio.toFixed(2)}×)` : `Training load is in the sweet spot (${latestRatio.toFixed(2)}×)`,
+      b: `When your weekly load runs above 1.3× your 4-week norm, ${Math.round(redS * 100)}% of mornings are red, vs ${Math.round(redN * 100)}% in the 0.8–1.3 band (${spikeDays.length} spike days on record).`,
+      a: latestRatio > 1.3 ? `<b>Pull back for 2–3 days</b> — ratio above 1.3 is where your reds cluster. Keep sessions but cut intensity.` : latestRatio < 0.8 ? `Room to build: <b>add one quality session</b> this week without risking a spike.` : `<b>Ramp no more than ~10% a week</b> to stay in the band.`, tone: latestRatio > 1.3 ? "bad" : latestRatio < 0.8 ? "warn" : "good" });
+  }
+  const ranked = acts.filter(a => a.n >= 10 && a.strain != null).sort((a, b) => (b.recNext - a.recNext));
+  if (ranked.length >= 2) {
+    const best = ranked[0], worst = ranked[ranked.length - 1];
+    ins.push({ k: "Training response", t: `${best.k} leaves you freshest; ${worst.k} costs the most`,
+      b: `Next-morning recovery averages ${f0(best.recNext)} after ${best.k} (strain ${f1(best.strain)}) vs ${f0(worst.recNext)} after ${worst.k} (strain ${f1(worst.strain)}). Rest-day baseline: ${f0(restRec)}.`,
+      a: best.strain >= worst.strain ? `${best.k} gives you <b>more strain for less recovery cost</b> — make it a staple, and schedule ${worst.k} right before an easy day.` : `Follow ${worst.k} with a <b>lighter day or ${best.k}</b> rather than stacking hard sessions.`, tone: null });
+  }
+  const sched = acts.filter(a => a.n >= 10).map(a => ({ k: a.k, ...(() => { const xs = per[a.k].filter(x => x.cur.recovery_score != null); const z = { good: 0, warn: 0, bad: 0 }; xs.forEach(x => z[zoneOf(+x.cur.recovery_score)]++); return { pctRed: z.bad / xs.length, pctGreen: z.good / xs.length, n: xs.length }; })() })).sort((a, b) => b.pctRed - a.pctRed)[0];
+  if (sched && sched.pctRed >= 0.2) ins.push({ k: "Timing", t: `${Math.round(sched.pctRed * 100)}% of your ${sched.k} sessions happen on red days`, b: `That's the activity you most often do when already run down (${sched.n} sessions). Hard work on a red morning has a poor return.`, a: `<b>Move ${sched.k} to green/yellow days</b> and swap in a walk or mobility when you wake up red.`, tone: "warn" });
+  const ev = slots.find(s => s.lab === "Evening"), md = slots.find(s => s.lab === "Midday") || slots.find(s => s.lab === "Morning");
+  if (ev && md && ev.sleep != null && md.sleep != null && Math.abs(ev.sleep - md.sleep) * 60 >= 15) {
+    const loss = (md.sleep - ev.sleep) * 60;
+    ins.push({ k: "Time of day", t: loss > 0 ? `Evening sessions cost you ~${Math.round(loss)} min of sleep` : `Evening training isn't hurting your sleep`, b: `Nights after evening sessions average ${hm(ev.sleep)} vs ${hm(md.sleep)} after ${md.lab.toLowerCase()} ones (${ev.n} vs ${md.n} sessions).`, a: loss > 0 ? `When you must train late, <b>finish by 8 pm</b> and treat lights-out as fixed, not "after I wind down".` : `<b>Keep your current schedule</b> — your sleep is robust to late sessions.`, tone: loss > 20 ? "warn" : null });
+  }
+  $("#trainInsights").innerHTML = ins.map(i => `<div class="ins" style="--tone:${i.tone ? `var(--${i.tone})` : "var(--line2)"}"><div class="k">${i.k}</div><div class="t">${i.t}</div><p class="b">${i.b}</p><p class="a">${i.a}</p></div>`).join("");
+}
+function bucketWeeklyVals(rows, vals) { const w = {}; rows.forEach((r, i) => (w[weekStart(r.day)] ||= []).push(vals[i])); return Object.entries(w).sort((a, b) => a[0].localeCompare(b[0])).map(([, v]) => mean(v)); }
 
 // ---- charts ----
 const NUMERIC = ["strain", "recovery_score", "rhr", "hrv_rmssd_ms", "performance_pct", "asleep_ms", "light_ms", "sws_ms", "rem_ms", "awake_ms", "need_baseline_ms", "need_debt_ms", "need_strain_ms", "need_nap_ms", "recovery_7d", "hrv_7d", "hrv_30d", "rhr_7d", "rhr_30d"];
