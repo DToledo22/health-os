@@ -406,9 +406,9 @@ function hero(l, base) {
 
 // ---- story / insights ----
 function story(latest) {
-  const win = range === 0 ? DAYS : lastNDays(Math.max(range, 60));
+  const win = range === 0 ? DAYS : lastNDays(Math.max(range, 120));
   const n = win.length;
-  $("#storyScope").textContent = `Based on ${range === 0 ? "all" : "the last " + Math.max(range, 60) + " days of"} data · ${n} days with scores`;
+  $("#storyScope").textContent = `Based on ${range === 0 ? "all" : "the last " + Math.max(range, 120) + " days of"} data · ${n} days with scores`;
   const ins = [];
   const add = (k, t, b, a, tone) => ins.push({ k, t, b, a, tone });
 
@@ -563,11 +563,12 @@ function analyst(rows, latest) {
       watch: () => { let n = 0; for (let i = 1; i < last14.length; i++) if (last14[i].tz_offset !== last14[i - 1].tz_offset) n++; return { m: "Timezone changes (14d)", cur: `${n}`, tg: "–", st: n === 0 ? "ok" : "warn" }; }, rule: () => `Travel days get a recovery protocol, not a workout` },
   ];
   // evaluate
+  const nOut = win.filter(r => rec(r) != null).length;
   const evald = F.map(f => {
     const bad = [], good = [];
     win.forEach(r => { const s = f.split(r); if (s == null) return; const o = f.out(r); if (o == null) return; (s ? bad : good).push(o); });
     if (bad.length < 8 || good.length < 8) return null;
-    const mb = mean(bad), mg = mean(good), delta = mg - mb, prev = bad.length / (bad.length + good.length), t = welch(good, bad);
+    const mb = mean(bad), mg = mean(good), delta = mg - mb, prev = bad.length / nOut, t = welch(good, bad);
     const conf = t >= 2.5 ? "strong" : t >= 1.7 ? "moderate" : "weak";
     return { ...f, title: typeof f.title === "function" ? f.title() : f.title, nb: bad.length, ng: good.length, mb, mg, delta, prev, impact: Math.max(0, delta) * prev, t, conf };
   }).filter(Boolean).filter(x => x.delta > 1.5);
@@ -585,7 +586,7 @@ function analyst(rows, latest) {
   const avgRec = avg(win, "recovery_score"), green = win.filter(r => zoneOf(rec(r)) === "good").length / win.length, red = win.filter(r => zoneOf(rec(r)) === "bad").length / win.length;
   const sleepAvg = H(avg(win, "asleep_ms")), needAvg = H(mean(win.map(needMs))), perf = avg(win, "performance_pct");
   const h7 = +latest.hrv_7d, h30 = +latest.hrv_30d, hp = h7 && h30 ? (h7 - h30) / h30 * 100 : null;
-  const gain = top.slice(0, 3).reduce((a, x) => a + x.impact, 0);
+  const gain = top.slice(0, 3).reduce((a, x, i) => a + x.impact * [1, 0.5, 0.33][i], 0);
   $("#summary").innerHTML = `Across <b>${win.length} days</b> you averaged <b>${f0(avgRec)}% recovery</b> — green ${Math.round(green * 100)}% of mornings, red ${Math.round(red * 100)}%. You slept <b>${hm(sleepAvg)}</b> a night against a need of <b>${hm(needAvg)}</b> (sleep performance ${f0(perf)}%), and your HRV is currently ${hp == null ? "near" : hp > 5 ? `<b>${hp.toFixed(0)}% above</b>` : hp < -5 ? `<b>${Math.abs(hp).toFixed(0)}% below</b>` : "near"} its 30-day baseline. ${top.length ? `The biggest drag on your scores is <b>${top[0].title.toLowerCase()}</b>${top[1] ? `, followed by <b>${top[1].title.toLowerCase()}</b>` : ""}. Fixing the top three is worth roughly <b>+${gain.toFixed(0)} recovery points</b> on an average day — the difference between a yellow and a green morning.` : ""}`;
   // protocol
   const monday = new Date(); monday.setDate(monday.getDate() - (monday.getDay() + 6) % 7);
@@ -612,7 +613,8 @@ function analyst(rows, latest) {
   top.forEach(x => { const w = x.watch(); if (!seen.has(w.m)) { seen.add(w.m); wl.push(w); } });
   $("#pWatch").innerHTML = wl.slice(0, 6).map(w => `<div class="wl"><div><div class="m">${w.m}</div><div class="tg">target ${w.tg}</div></div><div class="cur status ${w.st}" style="margin:0"><i></i>${w.cur}</div></div>`).join("");
   // 7-day plan from weekday pattern + activity response
-  const wd = {}; DAYS.forEach(r => { if (rec(r) != null) (wd[new Date(r.day + "T12:00:00").getDay()] ||= []).push(rec(r)); });
+  const wd = {}; win.forEach(r => { if (rec(r) != null) (wd[new Date(r.day + "T12:00:00").getDay()] ||= []).push(rec(r)); });
+  const todayKey = new Date().toISOString().slice(0, 10);
   const order = [1, 2, 3, 4, 5, 6, 0].map(k => ({ k, rec: mean(wd[k] || []) })).filter(x => x.rec != null).sort((a, b) => b.rec - a.rec);
   const hardDays = new Set(order.slice(0, 2).map(x => x.k)), easyDays = new Set(order.slice(-2).map(x => x.k));
   const acts = Object.entries(wmap.reduce((m, x) => { if (x.nxt && x.nxt.recovery_score != null && x.w.strain != null) (m[x.sport] ||= []).push(x); return m; }, {})).filter(([, xs]) => xs.length >= 8).map(([k, xs]) => ({ k, n: xs.length, strain: mean(xs.map(x => x.w.strain)), recNext: mean(xs.map(x => +x.nxt.recovery_score)) }));
@@ -620,7 +622,7 @@ function analyst(rows, latest) {
   const bestMod = acts.filter(a => a.strain >= 7 && a.strain < 11).sort((a, b) => b.recNext - a.recNext)[0]?.k || "a moderate session";
   const bestEasy = acts.filter(a => a.strain < 7).sort((a, b) => b.recNext - a.recNext)[0]?.k || "walking";
   const colors = { Hard: "var(--rhr)", Moderate: "var(--strain)", Recover: "var(--good)" };
-  $("#week").innerHTML = [1, 2, 3, 4, 5, 6, 0].map(k => { const kind = hardDays.has(k) ? "Hard" : easyDays.has(k) ? "Recover" : "Moderate"; const tgt = kind === "Hard" ? "14–17" : kind === "Moderate" ? "10–13" : "≤ 8"; const act = kind === "Hard" ? bestHard : kind === "Moderate" ? bestMod : bestEasy; const d = new Date(monday); d.setDate(monday.getDate() + [1, 2, 3, 4, 5, 6, 0].indexOf(k)); return `<div class="day" style="--dt:${colors[kind]}"><div class="dn">${WD[k]} ${d.getDate()}</div><div class="dk">${kind}</div><div class="ds">strain ${tgt}<br>${act}<br><span style="color:var(--muted)">your ${WD[k]} avg: ${f0(mean(wd[k] || []))}</span></div></div>`; }).join("");
+  $("#week").innerHTML = [1, 2, 3, 4, 5, 6, 0].map(k => { const kind = hardDays.has(k) ? "Hard" : easyDays.has(k) ? "Recover" : "Moderate"; const tgt = kind === "Hard" ? "14–17" : kind === "Moderate" ? "10–13" : "≤ 8"; const act = kind === "Hard" ? bestHard : kind === "Moderate" ? bestMod : bestEasy; const d = new Date(monday); d.setDate(monday.getDate() + [1, 2, 3, 4, 5, 6, 0].indexOf(k)); const past = d.toISOString().slice(0, 10) < todayKey; return `<div class="day" style="--dt:${colors[kind]};${past ? "opacity:.45" : ""}"><div class="dn">${WD[k]} ${d.getDate()}${d.toISOString().slice(0, 10) === todayKey ? " · today" : ""}</div><div class="dk">${kind}</div><div class="ds">strain ${tgt}<br>${act}<br><span style="color:var(--muted)">your ${WD[k]} avg: ${f0(mean(wd[k] || []))}</span></div></div>`; }).join("");
   $("#weekRule").innerHTML = `<b>Morning override:</b> wake up green → do the day as planned (or upgrade one level); yellow → hold the plan but cap at the lower end; red → drop to Recover regardless of what's scheduled. Hard days land on your historically best mornings (${order.slice(0, 2).map(x => WD[x.k]).join(" & ")}); recovery days on your worst (${order.slice(-2).map(x => WD[x.k]).join(" & ")}).`;
 }
 
