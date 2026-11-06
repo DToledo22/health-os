@@ -130,7 +130,7 @@ th:first-child,td:first-child{text-align:left}
 <script>
 const SUPABASE_URL = "https://xaiwglhicuguvcbycvbf.supabase.co";
 const SUPABASE_KEY = "sb_publishable_rknTc8J0VzOCwndVTv3IAA_LCHBmKoR";
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { db: { schema: "whoop" } });
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { db: { schema: "whoop" }, auth: { flowType: "implicit", persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
 const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const $ = (s) => document.querySelector(s);
 const H = (ms) => ms == null ? null : ms / 3600000;
@@ -163,8 +163,11 @@ async function boot() {
     sb.from("sync_log").select("ran_at,ok").order("ran_at", { ascending: false }).limit(1),
   ]);
   if (d.error) { $("#app").innerHTML = `<p>Could not load data: ${d.error.message}</p>`; return; }
-  DAYS = d.data.filter(r => r.recovery_score != null || r.strain != null);
+  DAYS = (d.data || []).filter(r => r.recovery_score != null || r.strain != null);
   WORKOUTS = w.data || [];
+  if (!DAYS.length) { $("#app").innerHTML = `<p class="muted">No data yet — the first sync hasn't landed. Check back in a few minutes.</p>`; return; }
+  if (w.error) console.warn("workouts:", w.error.message);
+  if (s.error) console.warn("sync_log:", s.error.message);
   if (s.data?.[0]) $("#synced").textContent = "Synced " + new Date(s.data[0].ran_at).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
   render();
 }
@@ -185,6 +188,7 @@ function avg(arr, k) { const v = arr.map(r => r[k]).filter(x => x != null).map(N
 function render() {
   const rows = inRange();
   const latest = DAYS[DAYS.length - 1];
+  if (!latest) return;
   const base = DAYS.slice(-31, -1); // prior 30 days
   tiles(latest, base);
   recoveryChart(rows); hrvChart(rows); rhrChart(rows); sleepChart(rows); scatterChart(rows); workoutChart(rows); weeklyTable(rows);
