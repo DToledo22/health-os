@@ -118,6 +118,50 @@ tr:last-child td{border-bottom:0}
 th:first-child,td:first-child{text-align:left}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:1px}
 
+/* analyst */
+.report .summary{font-size:14.5px;line-height:1.6;color:var(--ink);max-width:90ch;margin:4px 0 16px}
+.report .summary b{font-weight:650}
+.lev{display:flex;flex-direction:column;gap:10px}
+.lp{display:grid;grid-template-columns:44px 1.25fr 1fr 1fr;gap:14px;align-items:start;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.lp .rank{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-weight:800;font-size:15px;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent)}
+.lp .t{font-size:14px;font-weight:650;letter-spacing:-.1px}
+.lp .imp{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12px;color:var(--ink2)}
+.lp .imp .trk{flex:1;height:6px;background:var(--line);border-radius:999px;overflow:hidden;max-width:160px}
+.lp .imp .fil{height:100%;border-radius:999px;background:var(--accent)}
+.lp .conf{font-size:11px;font-weight:600;padding:1px 7px;border-radius:999px;border:1px solid var(--line2);color:var(--muted)}
+.lp .conf.strong{color:var(--good);border-color:color-mix(in srgb,var(--good) 40%,transparent)}
+.lp .conf.moderate{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,transparent)}
+.lp .ev{font-size:12.5px;color:var(--ink2);margin-top:6px}
+.lp h4{margin:0 0 4px;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);font-weight:600}
+.lp .fix,.lp .watch{font-size:12.8px}
+.lp .fix b{color:var(--accent);font-weight:650}
+.status{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;font-weight:600;color:var(--ink2)}
+.status i{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block}
+.status.ok i{background:var(--good)} .status.warn i{background:var(--warn)} .status.bad i{background:var(--bad)}
+.proto{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+.pcol{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.pcol h3{margin:0 0 10px;font-size:12px;letter-spacing:.6px;text-transform:uppercase;font-weight:650;color:var(--muted)}
+.pcol ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+.pcol li{font-size:13px;line-height:1.45;padding-left:22px;position:relative}
+.pcol li::before{content:"";position:absolute;left:0;top:7px;width:12px;height:12px;border-radius:4px;border:1.5px solid var(--line2)}
+.pcol.crit li::before{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 18%,transparent)}
+.pcol.win li::before{border-color:var(--good);background:color-mix(in srgb,var(--good) 18%,transparent)}
+.watchlist{display:flex;flex-direction:column;gap:8px}
+.wl{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;font-size:12.5px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.wl:last-child{border-bottom:0}
+.wl .m{color:var(--ink)}
+.wl .tg{color:var(--muted);font-size:11.5px}
+.wl .cur{font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:12px}
+.day{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 10px 12px;border-top:3px solid var(--dt,var(--line2))}
+.day .dn{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.4px;text-transform:uppercase}
+.day .dk{font-size:13.5px;font-weight:700;margin:3px 0 2px;color:var(--dt,var(--ink))}
+.day .ds{font-size:11.5px;color:var(--ink2);line-height:1.4}
+.rule{font-size:12px;color:var(--muted);margin-top:10px}
+.nav{display:flex;gap:4px}
+.nav a{font-size:12px;color:var(--ink2);text-decoration:none;padding:6px 9px;border-radius:8px}
+.nav a:hover{background:var(--panel2)}
+@media (max-width:980px){.lp{grid-template-columns:36px 1fr}.lp .rank{width:28px;height:28px;font-size:13px}.proto{grid-template-columns:1fr}.week{grid-template-columns:repeat(2,1fr)}.nav{display:none}}
 #auth{max-width:380px;margin:12vh auto;text-align:center}
 #auth input{width:100%;padding:11px 12px;border:1px solid var(--line2);border-radius:10px;background:var(--panel2);color:var(--ink);font:inherit;margin:14px 0 10px}
 #auth button.primary{width:100%;padding:11px;border:0;border-radius:10px;background:var(--ink);color:var(--bg);font:inherit;font-weight:600;cursor:pointer}
@@ -131,6 +175,7 @@ th:first-child,td:first-child{text-align:left}
 <header class="top"><div class="in">
   <div class="brand"><i></i>Health OS</div>
   <span class="synced" id="synced"></span>
+  <nav class="nav" id="nav" style="margin-left:8px"><a href="#report">Report</a><a href="#patterns">Patterns</a><a href="#training">Training</a><a href="#charts">Charts</a></nav>
   <span class="spacer"></span>
   <div class="seg" id="range">
     <button data-d="7">7d</button><button data-d="30" class="on">30d</button><button data-d="90">90d</button><button data-d="180">6mo</button><button data-d="365">1y</button><button data-d="0">All</button>
@@ -165,8 +210,24 @@ th:first-child,td:first-child{text-align:left}
       <div class="card tile"><div class="lbl">Day strain</div><div class="v" id="tStrain">–</div><span class="chip" id="dStrain"></span><svg class="spark" id="sStrain"></svg></div>
     </div>
 
-    <section class="card story">
-      <div class="head"><h2>What the data is telling you</h2><span class="sub" id="storyScope"></span></div>
+    <section class="card story report" id="report">
+      <div class="head"><h2>Analyst report</h2><span class="sub" id="reportScope"></span></div>
+      <p class="summary" id="summary"></p>
+      <h2 style="margin-bottom:10px">Top 5 leverage points <span class="sub" style="display:inline;font-weight:400">· ranked by recovery points you're leaving on the table each day</span></h2>
+      <div class="lev" id="leverage"></div>
+      <h2 style="margin:20px 0 0">This week's protocol <span class="sub" style="display:inline;font-weight:400" id="protoWeek"></span></h2>
+      <div class="proto">
+        <div class="pcol crit"><h3>Non-negotiables</h3><ul id="pCrit"></ul></div>
+        <div class="pcol win"><h3>Quick wins</h3><ul id="pWin"></ul></div>
+        <div class="pcol"><h3>Watch closely</h3><div class="watchlist" id="pWatch"></div></div>
+      </div>
+      <div class="week" id="week"></div>
+      <div class="rule" id="weekRule"></div>
+      <div class="foot">Effect sizes are differences in your own average recovery between days with and without each factor. "Strong" means the gap is unlikely to be noise (t ≥ 2.5); "moderate" t ≥ 1.7. Patterns, not diagnoses.</div>
+    </section>
+
+    <section class="card story" id="patterns">
+      <div class="head"><h2>Patterns in detail</h2><span class="sub" id="storyScope"></span></div>
       <div class="insights" id="insights"></div>
       <div class="drivers" id="drivers"></div>
       <div class="foot">Patterns from your own history, not medical advice. Comparisons need ≥ 5 days in each group to be shown.</div>
@@ -193,7 +254,7 @@ th:first-child,td:first-child{text-align:left}
       </div>
     </section>
 
-    <div class="grid">
+    <div class="grid" id="charts">
       <div class="card wide">
         <div class="ch"><div><h2>Recovery</h2><div class="sub">Green ≥ 67 · yellow 34–66 · red &lt; 34<span class="gran"></span></div></div><div class="kpi" id="kRec"></div></div>
         <div class="legend"><span><i style="background:var(--good)"></i>Green</span><span><i style="background:var(--warn)"></i>Yellow</span><span><i style="background:var(--bad)"></i>Red</span><span><i class="l" style="background:var(--ink2)"></i>7-day avg</span></div>
@@ -296,6 +357,7 @@ function render() {
   const base = DAYS.slice(-31, -1);
   hero(latest, base);
   story(latest);
+  analyst(rows, latest);
   training(rows);
   const cr = chartRows(rows), weekly = cr !== rows;
   document.querySelectorAll(".gran").forEach(e => e.textContent = weekly ? " · weekly averages" : "");
@@ -443,6 +505,123 @@ function story(latest) {
   cond("Weekend vs weekday", wkday, wkend, "Weekday", "Weekend");
   const bar = (lab, v, k) => `<div class="bar"><span class="lab">${lab}</span><div class="trk"><div class="fil" style="width:${Math.max(2, v)}%;--fill:${zoneColor(v)}"></div></div><span class="n">${f0(v)} <small>n=${k}</small></span></div>`;
   $("#drivers").innerHTML = drv.length ? `<div class="drv" style="grid-column:1/-1"><h3>Average recovery under different conditions</h3><div class="bars" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px 28px">${drv.map(d => bar(d.a[0], d.a[1], d.a[2]) + bar(d.b[0], d.b[1], d.b[2])).join("")}</div></div>` : "";
+}
+
+// ---- analyst engine ----
+const median = (a) => { const v = a.filter(x => x != null && !isNaN(x)).map(Number).sort((x, y) => x - y); return v.length ? v[Math.floor(v.length / 2)] : null; };
+function welch(a, b) { const ma = mean(a), mb = mean(b), sa = sd(a), sb = sd(b); if (ma == null || mb == null || sa == null || sb == null) return 0; const se = Math.sqrt(sa * sa / a.length + sb * sb / b.length); return se ? (ma - mb) / se : 0; }
+function analyst(rows, latest) {
+  const win = range === 0 ? DAYS : lastNDays(Math.max(range, 120));
+  const idx = new Map(DAYS.map((r, i) => [r.day, i]));
+  const nxt = (r) => { const n = DAYS[idx.get(r.day) + 1]; return n && dayDiff(r.day, n.day) === 1 ? n : null; };
+  const prv = (r) => { const p = DAYS[idx.get(r.day) - 1]; return p && dayDiff(p.day, r.day) === 1 ? p : null; };
+  const rec = (r) => r && r.recovery_score != null ? +r.recovery_score : null;
+  const acwrAll = acwrSeries(DAYS), acwrOf = (r) => acwrAll[idx.get(r.day)];
+  const wmap = workoutMap(), wByDay = {}; wmap.forEach(x => (wByDay[x.cur.day] ||= []).push(x));
+  const bedMed = median(win.map(r => r.bedtime_min)), rrMed = median(win.map(r => r.respiratory_rate)), stMed = median(win.map(r => r.skin_temp_c));
+  const last7 = DAYS.slice(-7), last14 = DAYS.slice(-14);
+  const inWin = (b) => (b - 18 * 60 + 1440) % 1440;
+  const gapMin = mean(win.filter(r => r.asleep_ms != null && needMs(r) != null && r.asleep_ms < needMs(r) * 0.9).map(r => (needMs(r) - r.asleep_ms) / 60000));
+  const bedLo = bedMed - 30, bedHi = bedMed + 15;
+  const bedWindowHits = (set) => set.filter(r => r.bedtime_min != null && r.bedtime_min >= bedLo && r.bedtime_min <= bedHi).length;
+  const F = [
+    { id: "sleep", group: "sleep", title: "Sleeping under your need", split: r => r.asleep_ms != null && needMs(r) != null ? r.asleep_ms < needMs(r) * 0.9 : null, out: rec,
+      fix: () => `<b>Lights out ${Math.round(Math.min(gapMin || 60, 90) / 15) * 15} min earlier</b> on weeknights. Nothing else you track moves recovery as much.`,
+      watch: () => { const h = last7.filter(r => r.asleep_ms != null && needMs(r) != null && r.asleep_ms >= needMs(r) * 0.95).length; return { m: "Nights meeting sleep need", cur: `${h}/7`, tg: "≥ 5 of 7", st: h >= 5 ? "ok" : h >= 3 ? "warn" : "bad" }; }, rule: () => `Sleep ≥ your need on 5 of 7 nights` },
+    { id: "late", group: "bedtime", title: () => `Late nights (after ${bedClock(bedMed + 45)})`, split: r => r.bedtime_min == null ? null : r.bedtime_min > bedMed + 45, out: rec,
+      fix: () => `Set a <b>bedtime window ${bedClock(bedLo)}–${bedClock(bedHi)}</b> and treat it like a meeting 5 nights a week.`,
+      watch: () => { const h = bedWindowHits(last7); return { m: "Bedtime inside window", cur: `${h}/7`, tg: "≥ 5 of 7", st: h >= 5 ? "ok" : h >= 3 ? "warn" : "bad" }; }, rule: () => `In bed between ${bedClock(bedLo)} and ${bedClock(bedHi)} at least 5 nights` },
+    { id: "irregular", group: "bedtime", title: "Irregular bedtime (±1 h from your norm)", split: r => r.bedtime_min == null ? null : Math.abs(r.bedtime_min - bedMed) > 60, out: rec,
+      fix: () => `Regularity beats duration: <b>same bedtime ±30 min</b>, weekends included.`,
+      watch: () => { const h = bedWindowHits(last7); return { m: "Bedtime inside window", cur: `${h}/7`, tg: "≥ 5 of 7", st: h >= 5 ? "ok" : h >= 3 ? "warn" : "bad" }; }, rule: () => `Bedtime within ±30 min of ${bedClock(bedMed)}` },
+    { id: "hardprev", group: "load", title: "Hard training day before (strain ≥ 14)", split: r => { const p = prv(r); return p && p.strain != null ? +p.strain >= 14 : null; }, out: rec,
+      fix: () => `<b>Hard → easy → hard.</b> Follow any strain ≥ 14 day with one capped at 10.`,
+      watch: () => { let b2b = 0; for (let i = 1; i < last7.length; i++) if (+last7[i].strain >= 12 && +last7[i - 1].strain >= 12) b2b++; return { m: "Back-to-back hard days (7d)", cur: `${b2b}`, tg: "0", st: b2b === 0 ? "ok" : b2b === 1 ? "warn" : "bad" }; }, rule: () => `No two hard days (strain ≥ 12) in a row` },
+    { id: "b2b", group: "load", title: "Two hard days back-to-back", split: r => { const p = prv(r), pp = p && prv(p); return p && pp && p.strain != null && pp.strain != null ? (+p.strain >= 12 && +pp.strain >= 12) : null; }, out: rec,
+      fix: () => `Never stack: <b>insert an easy day (≤ 10) between hard sessions</b>.`,
+      watch: () => { let b2b = 0; for (let i = 1; i < last7.length; i++) if (+last7[i].strain >= 12 && +last7[i - 1].strain >= 12) b2b++; return { m: "Back-to-back hard days (7d)", cur: `${b2b}`, tg: "0", st: b2b === 0 ? "ok" : b2b === 1 ? "warn" : "bad" }; }, rule: () => `No two hard days (strain ≥ 12) in a row` },
+    { id: "spike", group: "load", title: "Weekly load spikes (ratio > 1.3×)", split: r => { const p = prv(r); const a = p && acwrOf(p); return a == null ? null : a > 1.3; }, out: rec,
+      fix: () => `<b>Ramp weekly strain ≤ 10%</b>; when the ratio passes 1.3, cut intensity for 2–3 days.`,
+      watch: () => { const a = [...acwrAll].reverse().find(v => v != null); return { m: "Training load ratio", cur: a == null ? "–" : a.toFixed(2) + "×", tg: "0.8–1.3", st: a == null ? "" : a > 1.3 ? "bad" : a < 0.8 ? "warn" : "ok" }; }, rule: () => `Keep the 7-day load ratio between 0.8 and 1.3` },
+    { id: "red", group: "redtrain", title: "Training hard on red mornings", split: r => { const p = prv(r); if (!p || rec(p) == null || p.strain == null || rec(p) >= 34) return null; return +p.strain >= 10; }, out: rec,
+      fix: () => `Red morning = <b>strain cap 10</b>. Move the hard session 24–48 h.`,
+      watch: () => { const n = last14.filter(r => rec(r) != null && rec(r) < 34 && +r.strain >= 10).length; return { m: "Hard days on red mornings (14d)", cur: `${n}`, tg: "0", st: n === 0 ? "ok" : n === 1 ? "warn" : "bad" }; }, rule: () => `Wake up red → strain stays under 10` },
+    { id: "evening", group: "evening", title: "Late-evening sessions (start after 7 pm)", split: r => { const ws = wByDay[prv(r)?.day]; if (!ws || !ws.length) return null; return ws.some(x => x.hour >= 19); }, out: rec,
+      fix: () => `<b>Finish training by 8 pm.</b> If a session must be late, keep it low intensity.`,
+      watch: () => { const n = wmap.filter(x => x.hour >= 19 && x.cur.day >= last7[0].day).length; return { m: "Sessions after 7 pm (7d)", cur: `${n}`, tg: "≤ 1", st: n <= 1 ? "ok" : n <= 2 ? "warn" : "bad" }; }, rule: () => `Training done by 8 pm` },
+    { id: "weekend", group: "weekend", title: "Weekend nights (Fri & Sat)", split: r => [0, 6].includes(new Date(r.day + "T12:00:00").getDay()), out: rec,
+      fix: () => `Keep Friday and Saturday bedtimes <b>within 60 min of weeknights</b> — the Monday hole starts there.`,
+      watch: () => { const w = last7.filter(r => [0, 6].includes(new Date(r.day + "T12:00:00").getDay())); const m = avg(w, "recovery_score"); return { m: "Weekend-morning recovery", cur: f0(m), tg: "≥ weekday avg", st: m == null ? "" : m >= (avg(last7, "recovery_score") || 0) ? "ok" : "warn" }; }, rule: () => `Weekend bedtime within 60 min of weeknights` },
+    { id: "resp", group: "physio", title: "Nights with elevated breathing rate", split: r => r.respiratory_rate == null || rrMed == null ? null : +r.respiratory_rate > rrMed + 1, out: rec,
+      fix: () => `A raised overnight breathing rate usually means <b>alcohol, a late heavy meal, or oncoming illness</b>. Note what preceded those nights and cut the one that repeats.`,
+      watch: () => { const m = avg(last7, "respiratory_rate"); return { m: "Respiratory rate (7d)", cur: f1(m), tg: `≤ ${f1(rrMed + 0.5)}`, st: m == null ? "" : m <= rrMed + 0.5 ? "ok" : m <= rrMed + 1 ? "warn" : "bad" }; }, rule: () => `Overnight breathing rate within +0.5 of your baseline (${f1(rrMed)})` },
+    { id: "temp", group: "physio", title: "Nights with elevated skin temperature", split: r => r.skin_temp_c == null || stMed == null ? null : +r.skin_temp_c > stMed + 0.5, out: rec,
+      fix: () => `Elevated skin temp nights point to <b>illness, alcohol, or a hot room</b>. Cool the bedroom and log what else was going on.`,
+      watch: () => { const m = avg(last7, "skin_temp_c"); return { m: "Skin temp (7d)", cur: f1(m) + "°", tg: `≤ ${f1(stMed + 0.3)}°`, st: m == null ? "" : m <= stMed + 0.3 ? "ok" : "warn" }; }, rule: () => `Skin temperature near baseline` },
+    { id: "tz", group: "travel", title: "Timezone changes (travel days)", split: r => { const p = prv(r); return p && p.tz_offset && r.tz_offset ? p.tz_offset !== r.tz_offset : null; }, out: rec,
+      fix: () => `On travel days: <b>anchor your wake time, get daylight early, skip the late session</b>, and don't chase strain for 48 h.`,
+      watch: () => { let n = 0; for (let i = 1; i < last14.length; i++) if (last14[i].tz_offset !== last14[i - 1].tz_offset) n++; return { m: "Timezone changes (14d)", cur: `${n}`, tg: "–", st: n === 0 ? "ok" : "warn" }; }, rule: () => `Travel days get a recovery protocol, not a workout` },
+  ];
+  // evaluate
+  const evald = F.map(f => {
+    const bad = [], good = [];
+    win.forEach(r => { const s = f.split(r); if (s == null) return; const o = f.out(r); if (o == null) return; (s ? bad : good).push(o); });
+    if (bad.length < 8 || good.length < 8) return null;
+    const mb = mean(bad), mg = mean(good), delta = mg - mb, prev = bad.length / (bad.length + good.length), t = welch(good, bad);
+    const conf = t >= 2.5 ? "strong" : t >= 1.7 ? "moderate" : "weak";
+    return { ...f, title: typeof f.title === "function" ? f.title() : f.title, nb: bad.length, ng: good.length, mb, mg, delta, prev, impact: Math.max(0, delta) * prev, t, conf };
+  }).filter(Boolean).filter(x => x.delta > 1.5);
+  // one per group, rank by impact, prefer confidence
+  const byGroup = {}; evald.forEach(x => { if (!byGroup[x.group] || x.impact > byGroup[x.group].impact) byGroup[x.group] = x; });
+  let ranked = Object.values(byGroup).sort((a, b) => (b.conf !== "weak") - (a.conf !== "weak") || b.impact - a.impact);
+  const top = ranked.slice(0, 5), maxImp = Math.max(...top.map(x => x.impact), 0.1);
+  $("#reportScope").textContent = `${range === 0 ? "All history" : "Last " + Math.max(range, 120) + " days"} · ${win.length} days analysed · ${wmap.filter(x => x.cur.day >= win[0].day).length} sessions`;
+  $("#leverage").innerHTML = top.map((x, i) => { const w = x.watch(); return `<div class="lp"><div class="rank">${i + 1}</div>
+    <div><div class="t">${x.title}</div><div class="imp"><span>≈ <b>+${x.impact.toFixed(1)}</b> recovery pts/day if fixed</span><div class="trk"><div class="fil" style="width:${x.impact / maxImp * 100}%"></div></div><span class="conf ${x.conf}">${x.conf}</span></div>
+      <div class="ev">Happens on <b>${Math.round(x.prev * 100)}%</b> of days. Recovery averages <b>${f0(x.mb)}</b> on those days vs <b>${f0(x.mg)}</b> otherwise (−${f0(x.delta)}). n = ${x.nb} / ${x.ng}.</div></div>
+    <div><h4>Fix</h4><div class="fix">${x.fix()}</div></div>
+    <div><h4>Watch</h4><div class="watch">${w.m} <span class="tg" style="color:var(--muted)">· target ${w.tg}</span></div><div class="status ${w.st}"><i></i>now ${w.cur}</div></div></div>`; }).join("") || `<div class="sub">Not enough history in this range to rank leverage points — widen the range.</div>`;
+  // summary
+  const avgRec = avg(win, "recovery_score"), green = win.filter(r => zoneOf(rec(r)) === "good").length / win.length, red = win.filter(r => zoneOf(rec(r)) === "bad").length / win.length;
+  const sleepAvg = H(avg(win, "asleep_ms")), needAvg = H(mean(win.map(needMs))), perf = avg(win, "performance_pct");
+  const h7 = +latest.hrv_7d, h30 = +latest.hrv_30d, hp = h7 && h30 ? (h7 - h30) / h30 * 100 : null;
+  const gain = top.slice(0, 3).reduce((a, x) => a + x.impact, 0);
+  $("#summary").innerHTML = `Across <b>${win.length} days</b> you averaged <b>${f0(avgRec)}% recovery</b> — green ${Math.round(green * 100)}% of mornings, red ${Math.round(red * 100)}%. You slept <b>${hm(sleepAvg)}</b> a night against a need of <b>${hm(needAvg)}</b> (sleep performance ${f0(perf)}%), and your HRV is currently ${hp == null ? "near" : hp > 5 ? `<b>${hp.toFixed(0)}% above</b>` : hp < -5 ? `<b>${Math.abs(hp).toFixed(0)}% below</b>` : "near"} its 30-day baseline. ${top.length ? `The biggest drag on your scores is <b>${top[0].title.toLowerCase()}</b>${top[1] ? `, followed by <b>${top[1].title.toLowerCase()}</b>` : ""}. Fixing the top three is worth roughly <b>+${gain.toFixed(0)} recovery points</b> on an average day — the difference between a yellow and a green morning.` : ""}`;
+  // protocol
+  const monday = new Date(); monday.setDate(monday.getDate() - (monday.getDay() + 6) % 7);
+  $("#protoWeek").textContent = "· week of " + monday.toLocaleDateString([], { month: "short", day: "numeric" });
+  const crit = top.filter(x => x.conf !== "weak").slice(0, 3).map(x => x.rule());
+  if (!crit.length && top.length) crit.push(top[0].rule());
+  $("#pCrit").innerHTML = crit.map(c => `<li>${c}</li>`).join("") || "<li>Keep doing what you're doing — no strong drags found.</li>";
+  const wins = [];
+  const ids = new Set(top.map(x => x.id));
+  if (ids.has("evening") || ids.has("sleep")) wins.push("Finish every session by 8 pm; late ones go low-intensity.");
+  if (ids.has("sleep") || ids.has("late") || ids.has("irregular")) wins.push(`Phone alarm at ${bedClock(bedLo - 30)}: screens off, lights down, start the wind-down.`);
+  if (ids.has("resp") || ids.has("temp") || ids.has("weekend")) wins.push("No alcohol or heavy meals within 3 h of bed on weeknights; bedroom cool.");
+  if (ids.has("red") || ids.has("hardprev") || ids.has("b2b") || ids.has("spike")) wins.push("Decide the session <em>after</em> you see the morning score, not the night before.");
+  wins.push("20-min walk on rest days — your walking sessions carry the lowest recovery cost.");
+  wins.push("Check the Watch list each morning (30 seconds) before deciding intensity.");
+  $("#pWin").innerHTML = wins.slice(0, 4).map(c => `<li>${c}</li>`).join("");
+  // watch list: core vitals + top-factor watches
+  const wl = [];
+  const l = latest; const hrvSt = h7 && h30 ? (h7 >= h30 ? "ok" : h7 >= h30 * 0.92 ? "warn" : "bad") : "";
+  wl.push({ m: "HRV 7-day avg", cur: f0(l.hrv_7d) + " ms", tg: `≥ ${f0(l.hrv_30d)} (30d)`, st: hrvSt });
+  const r7 = +l.rhr_7d, r30 = +l.rhr_30d; wl.push({ m: "Resting HR 7-day avg", cur: f0(r7) + " bpm", tg: `≤ ${f0(r30)} (30d)`, st: r7 && r30 ? (r7 <= r30 ? "ok" : r7 <= r30 * 1.04 ? "warn" : "bad") : "" });
+  const sl7 = H(avg(last7, "asleep_ms")), nd7 = H(mean(last7.map(needMs))); wl.push({ m: "Sleep 7-day avg", cur: hm(sl7), tg: `≥ ${hm(nd7)} need`, st: sl7 && nd7 ? (sl7 >= nd7 * 0.95 ? "ok" : sl7 >= nd7 * 0.85 ? "warn" : "bad") : "" });
+  const seen = new Set(["HRV 7-day avg", "Resting HR 7-day avg", "Sleep 7-day avg"]);
+  top.forEach(x => { const w = x.watch(); if (!seen.has(w.m)) { seen.add(w.m); wl.push(w); } });
+  $("#pWatch").innerHTML = wl.slice(0, 6).map(w => `<div class="wl"><div><div class="m">${w.m}</div><div class="tg">target ${w.tg}</div></div><div class="cur status ${w.st}" style="margin:0"><i></i>${w.cur}</div></div>`).join("");
+  // 7-day plan from weekday pattern + activity response
+  const wd = {}; DAYS.forEach(r => { if (rec(r) != null) (wd[new Date(r.day + "T12:00:00").getDay()] ||= []).push(rec(r)); });
+  const order = [1, 2, 3, 4, 5, 6, 0].map(k => ({ k, rec: mean(wd[k] || []) })).filter(x => x.rec != null).sort((a, b) => b.rec - a.rec);
+  const hardDays = new Set(order.slice(0, 2).map(x => x.k)), easyDays = new Set(order.slice(-2).map(x => x.k));
+  const acts = Object.entries(wmap.reduce((m, x) => { if (x.nxt && x.nxt.recovery_score != null && x.w.strain != null) (m[x.sport] ||= []).push(x); return m; }, {})).filter(([, xs]) => xs.length >= 8).map(([k, xs]) => ({ k, n: xs.length, strain: mean(xs.map(x => x.w.strain)), recNext: mean(xs.map(x => +x.nxt.recovery_score)) }));
+  const bestHard = acts.filter(a => a.strain >= 11).sort((a, b) => b.recNext - a.recNext)[0]?.k || "your hardest session";
+  const bestMod = acts.filter(a => a.strain >= 7 && a.strain < 11).sort((a, b) => b.recNext - a.recNext)[0]?.k || "a moderate session";
+  const bestEasy = acts.filter(a => a.strain < 7).sort((a, b) => b.recNext - a.recNext)[0]?.k || "walking";
+  const colors = { Hard: "var(--rhr)", Moderate: "var(--strain)", Recover: "var(--good)" };
+  $("#week").innerHTML = [1, 2, 3, 4, 5, 6, 0].map(k => { const kind = hardDays.has(k) ? "Hard" : easyDays.has(k) ? "Recover" : "Moderate"; const tgt = kind === "Hard" ? "14–17" : kind === "Moderate" ? "10–13" : "≤ 8"; const act = kind === "Hard" ? bestHard : kind === "Moderate" ? bestMod : bestEasy; const d = new Date(monday); d.setDate(monday.getDate() + [1, 2, 3, 4, 5, 6, 0].indexOf(k)); return `<div class="day" style="--dt:${colors[kind]}"><div class="dn">${WD[k]} ${d.getDate()}</div><div class="dk">${kind}</div><div class="ds">strain ${tgt}<br>${act}<br><span style="color:var(--muted)">your ${WD[k]} avg: ${f0(mean(wd[k] || []))}</span></div></div>`; }).join("");
+  $("#weekRule").innerHTML = `<b>Morning override:</b> wake up green → do the day as planned (or upgrade one level); yellow → hold the plan but cap at the lower end; red → drop to Recover regardless of what's scheduled. Hard days land on your historically best mornings (${order.slice(0, 2).map(x => WD[x.k]).join(" & ")}); recovery days on your worst (${order.slice(-2).map(x => WD[x.k]).join(" & ")}).`;
 }
 
 // ---- training analysis ----
