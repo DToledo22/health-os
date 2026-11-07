@@ -171,7 +171,10 @@ th:first-child,td:first-child{text-align:left}
 .note .hl{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
 .note .hl span{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--panel);border:1px solid var(--line2);color:var(--ink2)}
 /* ask panel */
-#askBtn{position:fixed;right:20px;bottom:20px;z-index:40;display:flex;align-items:center;gap:8px;padding:11px 16px;border-radius:999px;border:1px solid var(--line2);background:var(--ink);color:var(--bg);font:inherit;font-weight:650;cursor:pointer;box-shadow:0 10px 30px -10px rgba(0,0,0,.6)}
+#askBtn{position:fixed;right:22px;bottom:22px;z-index:40;display:flex;align-items:center;gap:9px;padding:14px 22px;border-radius:999px;border:1px solid rgba(255,255,255,.28);background:linear-gradient(135deg,#34d399,#16a34a);color:#fff;font:inherit;font-size:14.5px;font-weight:700;letter-spacing:-.1px;cursor:pointer;box-shadow:0 0 0 5px color-mix(in srgb,var(--good) 30%,transparent),0 14px 34px -10px color-mix(in srgb,var(--good) 70%,transparent);animation:glow 2.6s ease-in-out infinite;transition:transform .15s}
+#askBtn:hover{transform:translateY(-1px) scale(1.02)}
+#askBtn i{font-style:normal;font-size:16px;line-height:1}
+@keyframes glow{0%,100%{box-shadow:0 0 0 5px color-mix(in srgb,var(--good) 30%,transparent),0 14px 34px -10px color-mix(in srgb,var(--good) 70%,transparent)}50%{box-shadow:0 0 0 9px color-mix(in srgb,var(--good) 14%,transparent),0 14px 34px -10px color-mix(in srgb,var(--good) 70%,transparent)}}
 #ask{position:fixed;top:0;right:0;height:100dvh;width:min(440px,100vw);background:var(--panel);border-left:1px solid var(--line2);z-index:50;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease;box-shadow:-20px 0 60px -30px rgba(0,0,0,.6)}
 #ask.open{transform:none}
 #ask .ah{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
@@ -322,12 +325,12 @@ th:first-child,td:first-child{text-align:left}
   </section>
 </main>
 
-<button id="askBtn" class="hidden">✦ Ask</button>
+<button id="askBtn" class="hidden"><i>✦</i>Get insights</button>
 <aside id="ask" aria-hidden="true">
-  <div class="ah"><b>Ask about your data</b><span class="sub" style="margin:0">Claude · queries your database live</span><span class="spacer"></span><button class="icon" id="askClose" title="Close">✕</button></div>
+  <div class="ah"><b>Insights</b><span class="sub" style="margin:0">Ask anything — it runs the numbers on your own data</span><span class="spacer"></span><button class="icon" id="askClose" title="Close">✕</button></div>
   <div class="msgs" id="msgs"></div>
   <div class="sugg" id="sugg"></div>
-  <form id="askForm"><input id="askIn" placeholder="e.g. Why were my Octobers so red?" autocomplete="off"><button class="send" id="askSend" type="submit">Send</button></form>
+  <form id="askForm"><input id="askIn" placeholder="e.g. Besides sleep, what should I focus on?" autocomplete="off"><button class="send" id="askSend" type="submit">Send</button></form>
 </aside>
 
 <script>
@@ -570,14 +573,14 @@ function md(src) { // tiny markdown: paragraphs, bullets, bold, italics, inline 
 function renderNote(n) {
   const el = $("#note"); el.classList.remove("hidden");
   const wk = new Date(n.week_start + "T12:00:00").toLocaleDateString([], { month: "short", day: "numeric" });
-  el.innerHTML = `<div class="nh"><b>Coach's note</b><span class="sub" style="margin:0">week of ${wk} · written by Claude from the week's data</span></div><div class="nb">${md(n.body_md)}</div>${Array.isArray(n.highlights) && n.highlights.length ? `<div class="hl">${n.highlights.map(h => `<span>${md(String(h)).replace(/<\/?p>/g, "")}</span>`).join("")}</div>` : ""}`;
+  el.innerHTML = `<div class="nh"><b>Coach's note</b><span class="sub" style="margin:0">week of ${wk} · written from the week's data every Monday</span></div><div class="nb">${md(n.body_md)}</div>${Array.isArray(n.highlights) && n.highlights.length ? `<div class="hl">${n.highlights.map(h => `<span>${md(String(h)).replace(/<\/?p>/g, "")}</span>`).join("")}</div>` : ""}`;
 }
 
 // ---- ask panel ----
 const ASK_URL = SUPABASE_URL + "/functions/v1/whoop-chat";
 const chat = { history: [], busy: false };
 const SUGGESTIONS = ["What's the story of my last 30 days?", "Which workouts leave me greenest the next morning?", "How does my sleep on weekends compare to weekdays?", "What should this week look like given my recovery?", "When was my best 2-week stretch and what was I doing?"];
-function openAsk() { $("#ask").classList.add("open"); $("#ask").setAttribute("aria-hidden", "false"); if (!chat.history.length) { addMsg("sys", "Ask anything about your WHOOP data. Claude writes and runs the queries, then explains the numbers."); renderSugg(); } setTimeout(() => $("#askIn").focus(), 250); }
+function openAsk() { $("#ask").classList.add("open"); $("#ask").setAttribute("aria-hidden", "false"); if (!chat.history.length) { addMsg("sys", "Ask about your sleep, recovery, strain or training. Every answer is computed from your own history — expand \"queries run\" under any answer to see exactly how."); renderSugg(); } setTimeout(() => $("#askIn").focus(), 250); }
 function closeAsk() { $("#ask").classList.remove("open"); $("#ask").setAttribute("aria-hidden", "true"); }
 $("#askBtn").onclick = openAsk; $("#askClose").onclick = closeAsk;
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeAsk(); });
