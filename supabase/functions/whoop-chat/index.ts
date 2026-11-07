@@ -22,7 +22,7 @@ DATA MODEL (schema "whoop", query views directly, no schema prefix needed):
 - daily_with_baselines: one row per WHOOP cycle, labeled by wake-up date. Columns: day (date), cycle_id, start_at, end_at, tz_offset, sleep_start_at, sleep_end_at, bedtime_min (minutes after 18:00 local; 360 = midnight, 420 = 1am), waketime_min (minutes after local midnight), strain (0-21), kilojoule, avg_hr, max_hr, recovery_score (0-100; green>=67, yellow 34-66, red<34), rhr (bpm), hrv_rmssd_ms, spo2_pct, skin_temp_c, performance_pct (sleep performance), consistency_pct, efficiency_pct, respiratory_rate, in_bed_ms, awake_ms, light_ms, sws_ms (deep), rem_ms, asleep_ms (light+deep+rem), need_baseline_ms, need_debt_ms, need_strain_ms, need_nap_ms (NEGATIVE when a nap reduced need), disturbance_count, sleep_cycle_count, workout_count, plus rolling baselines hrv_7d, hrv_30d, rhr_7d, rhr_30d, recovery_7d, recovery_30d, strain_7d, asleep_7d. Total sleep need = need_baseline_ms + need_debt_ms + need_strain_ms + need_nap_ms. Durations are milliseconds (divide by 3600000 for hours).
 - weekly: week_start, days, avg_recovery, avg_hrv, avg_rhr, avg_strain, total_strain, avg_sleep_hours, avg_sleep_perf, workouts.
 - workouts: id, start_at, end_at, tz_offset, sport_name, score_state, strain, avg_hr, max_hr, kilojoule, distance_m, altitude_gain_m, zone_zero_ms..zone_five_ms. A workout belongs to the cycle whose [start_at, end_at) contains its start_at.
-- notes: week_start, title, body_md, highlights (prior coach's notes).
+- notes: week_start, title, body_md, highlights (prior coach's notes).\n- settings: goals (json array, first = primary), event_name, event_date, birth_date, sex, steps_per_day, lean_mass_kg.
 WHOOP semantics: a cycle starts at sleep onset and ends at the next sleep onset; the recovery score is computed from the sleep at the START of the cycle, so "day" = the morning he woke up. The newest row is "today" (it may still be open: end_at null). Compare like with like: use the person's own baselines, not population norms.
 SQL rules: Postgres, single SELECT/WITH statement, no semicolons, at most 200 rows (aggregate rather than dumping rows). Local time = start_at + tz_offset interval. Round numbers sensibly. Today's date (UTC): ${new Date().toISOString().slice(0, 10)}.`;
 
@@ -64,8 +64,12 @@ Deno.serve(async (req) => {
 
   // 2) light context so simple questions need no query
   const { data: recent } = await admin.from("daily_with_baselines").select("day,recovery_score,hrv_rmssd_ms,rhr,strain,asleep_ms,performance_pct,hrv_7d,hrv_30d,rhr_7d,rhr_30d,recovery_7d,recovery_30d").order("day", { ascending: false }).limit(7);
+  const { data: settings } = await admin.from("settings").select("goals,event_name,event_date,birth_date,sex,steps_per_day,lean_mass_kg").eq("id", 1).maybeSingle();
+  const GOAL_LABELS: Record<string, string> = { longevity: "live longer / healthspan", vo2: "raise VO2 max & endurance", strength: "build strength & muscle", bodycomp: "lose fat / body composition", sleep: "sleep & stress resilience", event: `train for an event${settings?.event_name ? ` (${settings.event_name}${settings?.event_date ? ", " + settings.event_date : ""})` : ""}` };
+  const goals = Array.isArray(settings?.goals) ? settings!.goals.map((g: string, i: number) => `${i === 0 ? "PRIMARY: " : ""}${GOAL_LABELS[g] || g}`).join("; ") : "";
+  const age = settings?.birth_date ? ((Date.now() - new Date(settings.birth_date).getTime()) / (365.25 * 86400000)).toFixed(1) : null;
   const messages: unknown[] = [...history];
-  (messages[messages.length - 1] as { content: string }).content += `\n\n[context: last 7 rows of daily_with_baselines: ${JSON.stringify(recent)}]`;
+  (messages[messages.length - 1] as { content: string }).content += `\n\n[context: David's stated goals: ${goals || "none set — default to recovery and sleep"}. ${age ? `Age ${age}, ${settings?.sex || ""}.` : ""} Tailor every recommendation to the primary goal. Last 7 rows of daily_with_baselines: ${JSON.stringify(recent)}]`;
 
   // 3) agent loop
   const queries: { sql: string; purpose?: string; rows?: number; error?: string }[] = [];

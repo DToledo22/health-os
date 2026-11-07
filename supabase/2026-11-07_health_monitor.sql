@@ -47,3 +47,4 @@ select *,
        else 'ok' end as overall
 from s;
 grant select on whoop.health_monitor to authenticated;
+alter table whoop.settings add column if not exists goals jsonb not null default '[]'::jsonb, add column if not exists event_name text, add column if not exists event_date date;

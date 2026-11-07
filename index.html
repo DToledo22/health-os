@@ -216,6 +216,20 @@ th:first-child,td:first-child{text-align:left}
   #reportPrint table{width:100%;border-collapse:collapse;font-size:10px}#reportPrint th,#reportPrint td{border-bottom:1px solid #ddd;padding:3px 5px;text-align:right}#reportPrint th:first-child,#reportPrint td:first-child{text-align:left}
   #reportPrint .meta{color:#555;font-size:10px}
 }
+/* goals */
+.goals{display:grid;grid-template-columns:1.1fr 1fr;gap:12px;margin:4px 0 18px}
+.gchips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.gchip{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border-radius:999px;border:1px solid var(--line2);background:var(--panel);color:var(--ink2);font:inherit;font-size:12.5px;cursor:pointer}
+.gchip.on{border-color:color-mix(in srgb,var(--accent) 60%,transparent);background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--ink)}
+.gchip.on.primary{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+.gchip .tag{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--accent)}
+.gprog{display:flex;flex-direction:column;gap:10px}
+.gp{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
+.gp:last-child{border-bottom:0}
+.gp .m{font-size:12.5px}.gp .t{font-size:11.5px;color:var(--muted)}
+.gp .cur{font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.gp .trk{height:5px;background:var(--line);border-radius:999px;overflow:hidden;margin-top:5px}.gp .trk i{display:block;height:100%;background:var(--accent);border-radius:999px}
+@media (max-width:980px){.goals{grid-template-columns:1fr}}
 /* coach note */
 .note{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,transparent),transparent 60%),var(--panel2);border:1px solid color-mix(in srgb,var(--accent) 30%,var(--line));border-radius:14px;padding:16px 18px;margin:4px 0 18px}
 .note .nh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px}
@@ -300,6 +314,13 @@ th:first-child,td:first-child{text-align:left}
     <section class="card story report" id="report">
       <div class="head"><h2>Analyst report</h2><span class="sub" id="reportScope"></span></div>
       <div class="note hidden" id="note"></div>
+      <div class="goals">
+        <div class="drv"><h3>What are you optimizing for?</h3><div class="sub">Pick a primary goal (first tap) and up to two secondary. The protocol, weekly plan, watch list and Insights all adapt.</div>
+          <div class="gchips" id="gchips"></div>
+          <div class="setform" id="eventForm" style="display:none"><label>Event<input type="text" id="gEvName" placeholder="e.g. Half marathon" style="width:170px"></label><label>Date<input type="date" id="gEvDate"></label></div>
+          <div class="sub" id="gmsg" style="margin-top:8px"></div></div>
+        <div class="drv"><h3>Goal progress</h3><div class="gprog" id="gprog"></div></div>
+      </div>
       <p class="summary" id="summary"></p>
       <h2 style="margin-bottom:10px">Top 5 leverage points <span class="sub" style="display:inline;font-weight:400">· ranked by recovery points you're leaving on the table each day</span></h2>
       <div class="lev" id="leverage"></div>
@@ -482,6 +503,7 @@ function render() {
   const base = DAYS.slice(-31, -1);
   hero(latest, base);
   story(latest);
+  renderGoals();
   analyst(rows, latest);
   vitals();
   healthspan();
@@ -523,6 +545,7 @@ function hero(l, base) {
   $("#todayEyebrow").textContent = "Recovery · " + fmtDay(l.day);
   const recent14 = DAYS.slice(-14), debt = mean(recent14.map(r => needMs(r) != null && r.asleep_ms != null ? (needMs(r) - r.asleep_ms) / 60000 : null));
   const p = plan(rec, debt);
+  const g0 = goalList()[0]; if (g0 && DAYS.length) { const t = GOALS[g0].today(zoneOf(rec), goalContext()); if (t) p.line = t; }
   $("#zoneName").textContent = p.name; $("#todayLine").textContent = p.line; $("#targetStrain").textContent = p.target; $("#targetNote").textContent = p.note;
   const sp = DAYS.slice(-14);
   $("#tHrv").innerHTML = `${f0(l.hrv_rmssd_ms)}<small>ms</small>`; chip($("#dHrv"), +l.hrv_rmssd_ms, avg(base, "hrv_rmssd_ms"), " ms", true); spark($("#sHrv"), sp.map(r => r.hrv_rmssd_ms), css("--hrv"));
@@ -691,6 +714,62 @@ async function ask(q) {
   chat.busy = false; $("#askSend").disabled = false; $("#msgs").scrollTop = 1e9;
 }
 
+// ---- goals ----
+const GOALS = {
+  longevity: { lbl: "Live longer, healthier", icon: "🧬", metrics: (c) => [["Health Age vs. actual", c.hsDelta == null ? null : (c.hsDelta >= 0 ? "+" : "") + c.hsDelta.toFixed(1) + " yrs", "below 0", c.hsDelta == null ? null : Math.max(0, Math.min(1, (3 - c.hsDelta) / 6))], ["Zone 1–3 training", f0(c.z13) + " min/wk", "≥ 150", Math.min(1, c.z13 / 150)], ["Strength sessions", f1(c.strSessions) + "/wk", "≥ 2", Math.min(1, c.strSessions / 2)], ["Sleep consistency", f0(c.cons) + "%", "≥ 80%", Math.min(1, c.cons / 80)]],
+    rules: () => ["150+ minutes in zones 1–3 this week, spread over 3+ days", "Two strength sessions, 45+ min each"], wins: () => ["Walk after your biggest meal — cheapest zone-1 minutes you'll get."],
+    hard: "boxing or a long zone-2 session", mod: "strength (full body)", rec: "45-min walk", today: (z) => z === "good" ? "A green morning on a longevity plan: bank a long zone-2 session or a strength day — consistency beats heroics." : null },
+  vo2: { lbl: "Raise VO₂ max / endurance", icon: "🫁", metrics: (c) => [["VO₂ max (est.)", f0(c.vo2) + " ml/kg/min", c.vo2Target ? "≥ " + c.vo2Target : "trend ↑", c.vo2Target ? Math.min(1, c.vo2 / c.vo2Target) : null], ["Zone 4–5 time", f0(c.z45) + " min/wk", "≥ 75", Math.min(1, c.z45 / 75)], ["Interval sessions", f1(c.intervals) + "/wk", "≥ 1", Math.min(1, c.intervals)], ["Resting HR (30d)", f0(c.rhr30) + " bpm", "trend ↓", null]],
+    rules: () => ["One interval session this week: 4×4 min at 90–95% max HR (≈175–183 bpm), 3 min easy between", "Keep 3 easy aerobic sessions in zones 1–3 — the base the intervals build on"], wins: () => ["Make one boxing/martial-arts session deliberately intervals — you already hit the HR there."],
+    hard: "intervals — 4×4 at 90–95% max HR", mod: "steady zone-2 cardio, 40–60 min", rec: "easy walk or mobility", today: (z) => z === "good" ? "Green and chasing VO₂ max: today is your interval day. 4×4 minutes at 175–183 bpm, 3 easy between, then done." : z === "warn" ? "Yellow: steady zone-2 today, save the intervals for the next green morning." : null },
+  strength: { lbl: "Build strength / muscle", icon: "🏋️", metrics: (c) => [["Strength sessions", f1(c.strSessions) + "/wk", "≥ 3", Math.min(1, c.strSessions / 3)], ["Strength minutes", f0(c.str) + " min/wk", "≥ 120", Math.min(1, c.str / 120)], ["Sleep (7d)", hm(c.sleep7), "≥ 7h", c.sleep7 == null ? null : Math.min(1, c.sleep7 / 7)], ["Green mornings (30d)", c.greenPct == null ? null : f0(c.greenPct) + "%", "≥ 40%", c.greenPct == null ? null : Math.min(1, c.greenPct / 40)]],
+    rules: () => ["Three strength sessions, 45–60 min, on green or yellow mornings", "Sleep ≥ 7 h on lifting nights — that's when the adaptation happens"], wins: () => ["Lift before the hard cardio in a week, never the day after it."],
+    hard: "heavy strength (compound lifts)", mod: "strength (accessory / volume)", rec: "walk + mobility", today: (z) => z === "good" ? "Green on a strength plan: heavy compound day — squat/hinge/press/pull, leave 1–2 reps in reserve." : z === "bad" ? "Red: skip the bar today; a walk and mobility, and protect sleep tonight." : null },
+  bodycomp: { lbl: "Lose fat / body composition", icon: "🔥", metrics: (c) => [["Zone 1–3 training", f0(c.z13) + " min/wk", "≥ 200", Math.min(1, c.z13 / 200)], ["Daily steps", c.steps ? c.steps.toLocaleString() : null, "≥ 8,000", c.steps ? Math.min(1, c.steps / 8000) : null], ["Strength sessions", f1(c.strSessions) + "/wk", "≥ 2", Math.min(1, c.strSessions / 2)], ["Sleep (7d)", hm(c.sleep7), "≥ 7h", c.sleep7 == null ? null : Math.min(1, c.sleep7 / 7)]],
+    rules: () => ["200+ zone 1–3 minutes this week (walks count)", "Two strength sessions to hold muscle while losing fat"], wins: () => ["Log meals in Insights for a week — nutrition is the half of this the strap can't see."],
+    hard: "boxing or a long hike", mod: "strength + 20-min walk", rec: "45–60 min walk", today: (z) => z === "bad" ? "Red on a fat-loss plan: a long walk still counts — 45 minutes, easy pace, and keep the deficit modest today." : null },
+  sleep: { lbl: "Sleep & stress resilience", icon: "🌙", metrics: (c) => [["Nights meeting need (7d)", c.sleepMet + "/7", "≥ 5", c.sleepMet / 5], ["Bedtime in window (7d)", c.bedHits + "/7", "≥ 5", c.bedHits / 5], ["HRV 7d vs 30d", c.hrvPct == null ? null : (c.hrvPct >= 0 ? "+" : "") + c.hrvPct.toFixed(0) + "%", "≥ 0%", c.hrvPct == null ? null : Math.max(0, Math.min(1, (c.hrvPct + 10) / 10))], ["Sleep consistency", f0(c.cons) + "%", "≥ 80%", Math.min(1, c.cons / 80)]],
+    rules: (c) => [`In bed between ${c.bedLoClock} and ${c.bedHiClock}, 5+ nights`, "No training after 8 pm; no alcohol within 3 h of bed on weeknights"], wins: () => ["Same wake time every day, weekends included — it anchors everything else."],
+    hard: "your favorite hard session, finished by 7 pm", mod: "moderate session, done by 7 pm", rec: "walk, stretch, early night", today: (z) => z === "bad" ? "Red on a sleep plan: today's only job is tonight — lights out inside your window, no late screens." : null },
+  event: { lbl: "Train for an event", icon: "🏁", metrics: (c) => [["Days to event", c.daysToEvent == null ? null : String(c.daysToEvent), c.eventName || "set a date", null], ["Load ratio", c.acwr == null ? null : c.acwr.toFixed(2) + "×", "0.8–1.3", c.acwr == null ? null : (c.acwr >= 0.8 && c.acwr <= 1.3 ? 1 : 0.4)], ["Weekly strain (7d)", f0(c.strain7) , "steady build", null], ["Green mornings (30d)", c.greenPct == null ? null : f0(c.greenPct) + "%", "≥ 40%", c.greenPct == null ? null : Math.min(1, c.greenPct / 40)]],
+    rules: (c) => c.daysToEvent != null && c.daysToEvent <= 10 ? ["Taper: cut volume ~40%, keep one short sharp session, protect sleep", "No new exercises or shoes this close to the event"] : ["Build load no more than 10% a week — ratio stays under 1.3", "One event-specific hard session, one long easy session, per week"], wins: () => ["Rehearse race-day breakfast and timing on a long-session day."],
+    hard: "event-specific hard session", mod: "event-specific steady session", rec: "easy day or rest", today: (z, c) => c.daysToEvent != null && c.daysToEvent <= 10 ? `${c.daysToEvent} days to ${c.eventName || "your event"}: taper week — short, sharp, rested.` : null },
+};
+const goalList = () => Array.isArray(SETTINGS.goals) ? SETTINGS.goals.filter(g => GOALS[g]) : [];
+function goalContext() {
+  const d30 = lastNDays(30), d7 = DAYS.slice(-7), d182 = lastNDays(182), l = DAYS[DAYS.length - 1] || {};
+  const wk = (n) => { const from = lastNDays(n)[0]?.day; return WORKOUTS.filter(w => w.score_state !== "PENDING_SCORE" && w.start_at.slice(0, 10) >= from); };
+  const w30 = wk(30), weeks = Math.max(1, d30.length / 7);
+  const m30 = hsMetrics(d30, w30), m182 = hsMetrics(d182, wk(182));
+  const strSessions = w30.filter(w => STRENGTH.test(w.sport_name || "")).length / weeks;
+  const intervals = w30.filter(w => ((+w.zone_four_ms || 0) + (+w.zone_five_ms || 0)) >= 10 * 60000).length / weeks;
+  const age = ageFrom(SETTINGS.birth_date), I = hsImpacts(m182, age, SETTINGS.sex || null), hsDelta = I.reduce((a, x) => a + (x.years || 0), 0);
+  const bedMed = median(d182.map(r => r.bedtime_min)) ?? 420, bedLo = bedMed - 30, bedHi = bedMed + 15;
+  const acwrAll = acwrSeries(DAYS), acwr = [...acwrAll].reverse().find(v => v != null) ?? null;
+  const ev = SETTINGS.event_date ? Math.round((new Date(SETTINGS.event_date + "T12:00:00") - new Date()) / 86400000) : null;
+  return { z13: m30.z13, z45: m30.z45, str: m30.str, strSessions, intervals, vo2: m182.vo2, vo2Target: m182.vo2 ? Math.round(m182.vo2 + 3) : null, rhr30: avg(d30, "rhr"), cons: avg(d30, "consistency_pct") ?? 0, hsDelta: age ? hsDelta : null,
+    sleep7: H(avg(d7, "asleep_ms")), sleepMet: d7.filter(r => r.asleep_ms != null && needMs(r) != null && r.asleep_ms >= needMs(r) * 0.95).length, bedHits: d7.filter(r => r.bedtime_min != null && r.bedtime_min >= bedLo && r.bedtime_min <= bedHi).length,
+    bedLoClock: bedClock(bedLo), bedHiClock: bedClock(bedHi), hrvPct: l.hrv_7d && l.hrv_30d ? (l.hrv_7d - l.hrv_30d) / l.hrv_30d * 100 : null, greenPct: d30.length ? d30.filter(r => zoneOf(+r.recovery_score) === "good").length / d30.length * 100 : null,
+    steps: +SETTINGS.steps_per_day || null, acwr, strain7: d7.reduce((a, r) => a + (+r.strain || 0), 0), daysToEvent: ev, eventName: SETTINGS.event_name };
+}
+function renderGoals() {
+  const sel = goalList();
+  $("#gchips").innerHTML = Object.entries(GOALS).map(([k, g]) => { const i = sel.indexOf(k); return `<button type="button" class="gchip ${i >= 0 ? "on" : ""} ${i === 0 ? "primary" : ""}" data-g="${k}">${g.icon} ${g.lbl}${i === 0 ? ` <span class="tag">primary</span>` : i > 0 ? ` <span class="tag">${i + 1}</span>` : ""}</button>`; }).join("");
+  $("#gchips").querySelectorAll("button").forEach(b => b.onclick = () => toggleGoal(b.dataset.g));
+  $("#eventForm").style.display = sel.includes("event") ? "flex" : "none"; $("#gEvName").value = SETTINGS.event_name || ""; $("#gEvDate").value = SETTINGS.event_date || "";
+  const c = goalContext();
+  $("#gprog").innerHTML = sel.length ? sel.map(k => { const g = GOALS[k]; return `<div style="font-size:12px;color:var(--muted);font-weight:600;margin-top:4px">${g.icon} ${g.lbl}</div>` + g.metrics(c).map(([m, cur, tgt, p]) => `<div class="gp"><div><div class="m">${m} <span class="t">· target ${tgt}</span></div>${p != null ? `<div class="trk"><i style="width:${Math.round(Math.max(0.02, Math.min(1, p)) * 100)}%;background:${p >= 1 ? "var(--good)" : p >= 0.6 ? "var(--warn)" : "var(--bad)"}"></i></div>` : ""}</div><div class="cur">${cur == null ? "<span class='na'>—</span>" : cur}</div></div>`).join(""); }).join("") : `<div class="sub">Pick a goal to see progress here. Until then the coaching optimizes for recovery and sleep.</div>`;
+}
+async function toggleGoal(k) {
+  let sel = goalList(); if (sel.includes(k)) sel = sel.filter(x => x !== k); else if (sel.length < 3) sel.push(k); else { $("#gmsg").textContent = "Three goals max — remove one first."; return; }
+  SETTINGS.goals = sel; renderGoals(); await saveGoals();
+}
+async function saveGoals() {
+  const payload = { id: 1, goals: goalList(), event_name: $("#gEvName").value || null, event_date: $("#gEvDate").value || null, updated_at: new Date().toISOString() };
+  const { error } = await sb.from("settings").upsert(payload); $("#gmsg").textContent = error ? error.message : "Saved — coaching updated."; if (!error) { Object.assign(SETTINGS, payload); render(); }
+}
+$("#gEvName").addEventListener("change", saveGoals); $("#gEvDate").addEventListener("change", saveGoals);
+
 // ---- analyst engine ----
 const median = (a) => { const v = a.filter(x => x != null && !isNaN(x)).map(Number).sort((x, y) => x - y); return v.length ? v[Math.floor(v.length / 2)] : null; };
 function welch(a, b) { const ma = mean(a), mb = mean(b), sa = sd(a), sb = sd(b); if (ma == null || mb == null || sa == null || sb == null) return 0; const se = Math.sqrt(sa * sa / a.length + sb * sb / b.length); return se ? (ma - mb) / se : 0; }
@@ -775,8 +854,11 @@ function analyst(rows, latest) {
   // protocol
   const monday = new Date(); monday.setDate(monday.getDate() - (monday.getDay() + 6) % 7);
   $("#protoWeek").textContent = "· week of " + monday.toLocaleDateString([], { month: "short", day: "numeric" });
-  const crit = top.filter(x => x.conf !== "weak").slice(0, 3).map(x => x.rule());
+  const gsel = goalList(), gctx = gsel.length ? goalContext() : null;
+  const crit = top.filter(x => x.conf !== "weak").slice(0, 2).map(x => x.rule());
   if (!crit.length && top.length) crit.push(top[0].rule());
+  if (gsel[0]) crit.push(...GOALS[gsel[0]].rules(gctx).slice(0, 2));
+  gsel.slice(1).forEach(k => crit.push(GOALS[k].rules(gctx)[0]));
   $("#pCrit").innerHTML = crit.map(c => `<li>${c}</li>`).join("") || "<li>Keep doing what you're doing — no strong drags found.</li>";
   const wins = [];
   const ids = new Set(top.map(x => x.id));
@@ -784,9 +866,10 @@ function analyst(rows, latest) {
   if (ids.has("sleep") || ids.has("late") || ids.has("irregular")) wins.push(`Phone alarm at ${bedClock(bedLo - 30)}: screens off, lights down, start the wind-down.`);
   if (ids.has("resp") || ids.has("temp") || ids.has("weekend")) wins.push("No alcohol or heavy meals within 3 h of bed on weeknights; bedroom cool.");
   if (ids.has("red") || ids.has("hardprev") || ids.has("b2b") || ids.has("spike")) wins.push("Decide the session <em>after</em> you see the morning score, not the night before.");
+  gsel.forEach(k => wins.push(...GOALS[k].wins(gctx)));
   wins.push("20-min walk on rest days — your walking sessions carry the lowest recovery cost.");
   wins.push("Check the Watch list each morning (30 seconds) before deciding intensity.");
-  $("#pWin").innerHTML = wins.slice(0, 4).map(c => `<li>${c}</li>`).join("");
+  $("#pWin").innerHTML = wins.slice(0, 5).map(c => `<li>${c}</li>`).join("");
   // watch list: core vitals + top-factor watches
   const wl = [];
   const l = latest; const hrvSt = h7 && h30 ? (h7 >= h30 ? "ok" : h7 >= h30 * 0.92 ? "warn" : "bad") : "";
@@ -795,16 +878,18 @@ function analyst(rows, latest) {
   const sl7 = H(avg(last7, "asleep_ms")), nd7 = H(mean(last7.map(needMs))); wl.push({ m: "Sleep 7-day avg", cur: hm(sl7), tg: `≥ ${hm(nd7)} need`, st: sl7 && nd7 ? (sl7 >= nd7 * 0.95 ? "ok" : sl7 >= nd7 * 0.85 ? "warn" : "bad") : "" });
   const seen = new Set(["HRV 7-day avg", "Resting HR 7-day avg", "Sleep 7-day avg"]);
   top.forEach(x => { const w = x.watch(); if (!seen.has(w.m)) { seen.add(w.m); wl.push(w); } });
-  $("#pWatch").innerHTML = wl.slice(0, 6).map(w => `<div class="wl"><div><div class="m">${w.m}</div><div class="tg">target ${w.tg}</div></div><div class="cur status ${w.st}" style="margin:0"><i></i>${w.cur}</div></div>`).join("");
+  if (gsel[0]) GOALS[gsel[0]].metrics(gctx).slice(0, 2).forEach(([m, cur, tg, p]) => { if (!seen.has(m) && cur != null) { seen.add(m); wl.push({ m, cur, tg, st: p == null ? "" : p >= 1 ? "ok" : p >= 0.6 ? "warn" : "bad" }); } });
+  $("#pWatch").innerHTML = wl.slice(0, 7).map(w => `<div class="wl"><div><div class="m">${w.m}</div><div class="tg">target ${w.tg}</div></div><div class="cur status ${w.st}" style="margin:0"><i></i>${w.cur}</div></div>`).join("");
   // 7-day plan from weekday pattern + activity response
   const wd = {}; win.forEach(r => { if (rec(r) != null) (wd[new Date(r.day + "T12:00:00").getDay()] ||= []).push(rec(r)); });
   const todayKey = new Date().toISOString().slice(0, 10);
   const order = [1, 2, 3, 4, 5, 6, 0].map(k => ({ k, rec: mean(wd[k] || []) })).filter(x => x.rec != null).sort((a, b) => b.rec - a.rec);
   const hardDays = new Set(order.slice(0, 2).map(x => x.k)), easyDays = new Set(order.slice(-2).map(x => x.k));
   const acts = Object.entries(wmap.reduce((m, x) => { if (x.nxt && x.nxt.recovery_score != null && x.w.strain != null) (m[x.sport] ||= []).push(x); return m; }, {})).filter(([, xs]) => xs.length >= 8).map(([k, xs]) => ({ k, n: xs.length, strain: mean(xs.map(x => x.w.strain)), recNext: mean(xs.map(x => +x.nxt.recovery_score)) }));
-  const bestHard = acts.filter(a => a.strain >= 11).sort((a, b) => b.recNext - a.recNext)[0]?.k || "your hardest session";
-  const bestMod = acts.filter(a => a.strain >= 7 && a.strain < 11).sort((a, b) => b.recNext - a.recNext)[0]?.k || "a moderate session";
-  const bestEasy = acts.filter(a => a.strain < 7).sort((a, b) => b.recNext - a.recNext)[0]?.k || "walking";
+  let bestHard = acts.filter(a => a.strain >= 11).sort((a, b) => b.recNext - a.recNext)[0]?.k || "your hardest session";
+  let bestMod = acts.filter(a => a.strain >= 7 && a.strain < 11).sort((a, b) => b.recNext - a.recNext)[0]?.k || "a moderate session";
+  let bestEasy = acts.filter(a => a.strain < 7).sort((a, b) => b.recNext - a.recNext)[0]?.k || "walking";
+  if (gsel[0]) { const g = GOALS[gsel[0]]; bestHard = g.hard; bestMod = g.mod; bestEasy = g.rec; }
   const colors = { Hard: "var(--rhr)", Moderate: "var(--strain)", Recover: "var(--good)" };
   $("#week").innerHTML = [1, 2, 3, 4, 5, 6, 0].map(k => { const kind = hardDays.has(k) ? "Hard" : easyDays.has(k) ? "Recover" : "Moderate"; const tgt = kind === "Hard" ? "14–17" : kind === "Moderate" ? "10–13" : "≤ 8"; const act = kind === "Hard" ? bestHard : kind === "Moderate" ? bestMod : bestEasy; const d = new Date(monday); d.setDate(monday.getDate() + [1, 2, 3, 4, 5, 6, 0].indexOf(k)); const past = d.toISOString().slice(0, 10) < todayKey; return `<div class="day" style="--dt:${colors[kind]};${past ? "opacity:.45" : ""}"><div class="dn">${WD[k]} ${d.getDate()}${d.toISOString().slice(0, 10) === todayKey ? " · today" : ""}</div><div class="dk">${kind}</div><div class="ds">strain ${tgt}<br>${act}<br><span style="color:var(--muted)">your ${WD[k]} avg: ${f0(mean(wd[k] || []))}</span></div></div>`; }).join("");
   $("#weekRule").innerHTML = `<b>Morning override:</b> wake up green → do the day as planned (or upgrade one level); yellow → hold the plan but cap at the lower end; red → drop to Recover regardless of what's scheduled. Hard days land on your historically best mornings (${order.slice(0, 2).map(x => WD[x.k]).join(" & ")}); recovery days on your worst (${order.slice(-2).map(x => WD[x.k]).join(" & ")}).`;
