@@ -877,8 +877,8 @@ function analyst(rows, latest) {
   const r7 = +l.rhr_7d, r30 = +l.rhr_30d; wl.push({ m: "Resting HR 7-day avg", cur: f0(r7) + " bpm", tg: `≤ ${f0(r30)} (30d)`, st: r7 && r30 ? (r7 <= r30 ? "ok" : r7 <= r30 * 1.04 ? "warn" : "bad") : "" });
   const sl7 = H(avg(last7, "asleep_ms")), nd7 = H(mean(last7.map(needMs))); wl.push({ m: "Sleep 7-day avg", cur: hm(sl7), tg: `≥ ${hm(nd7)} need`, st: sl7 && nd7 ? (sl7 >= nd7 * 0.95 ? "ok" : sl7 >= nd7 * 0.85 ? "warn" : "bad") : "" });
   const seen = new Set(["HRV 7-day avg", "Resting HR 7-day avg", "Sleep 7-day avg"]);
-  top.forEach(x => { const w = x.watch(); if (!seen.has(w.m)) { seen.add(w.m); wl.push(w); } });
   if (gsel[0]) GOALS[gsel[0]].metrics(gctx).slice(0, 2).forEach(([m, cur, tg, p]) => { if (!seen.has(m) && cur != null) { seen.add(m); wl.push({ m, cur, tg, st: p == null ? "" : p >= 1 ? "ok" : p >= 0.6 ? "warn" : "bad" }); } });
+  top.forEach(x => { const w = x.watch(); if (!seen.has(w.m)) { seen.add(w.m); wl.push(w); } });
   $("#pWatch").innerHTML = wl.slice(0, 7).map(w => `<div class="wl"><div><div class="m">${w.m}</div><div class="tg">target ${w.tg}</div></div><div class="cur status ${w.st}" style="margin:0"><i></i>${w.cur}</div></div>`).join("");
   // 7-day plan from weekday pattern + activity response
   const wd = {}; win.forEach(r => { if (rec(r) != null) (wd[new Date(r.day + "T12:00:00").getDay()] ||= []).push(rec(r)); });
