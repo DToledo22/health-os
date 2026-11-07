@@ -162,6 +162,59 @@ th:first-child,td:first-child{text-align:left}
 .nav a{font-size:12px;color:var(--ink2);text-decoration:none;padding:6px 9px;border-radius:8px}
 .nav a:hover{background:var(--panel2)}
 @media (max-width:980px){.lp{grid-template-columns:36px 1fr;gap:8px 12px}.lp>div{grid-column:2}.lp .rank{grid-column:1;grid-row:1;width:28px;height:28px;font-size:13px}.proto{grid-template-columns:1fr}.week{grid-template-columns:repeat(2,1fr)}.nav{display:none}}
+/* vitals */
+.vgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.vit{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px 16px;position:relative;overflow:hidden;border-top:3px solid var(--vs,var(--line2))}
+.vit .lbl{font-size:12px;color:var(--muted);font-weight:500}
+.vit .v{font-size:24px;font-weight:700;letter-spacing:-.6px;margin-top:2px}
+.vit .v small{font-size:12px;color:var(--muted);font-weight:500;margin-left:3px;letter-spacing:0}
+.vit .rng{font-size:11.5px;color:var(--muted);margin-top:2px}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:650;padding:2px 8px;border-radius:999px;margin-top:8px;border:1px solid var(--line2);color:var(--ink2)}
+.pill.ok{color:var(--good);border-color:color-mix(in srgb,var(--good) 40%,transparent);background:color-mix(in srgb,var(--good) 10%,transparent)}
+.pill.watch{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,transparent);background:color-mix(in srgb,var(--warn) 10%,transparent)}
+.pill.alert{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,transparent);background:color-mix(in srgb,var(--bad) 10%,transparent)}
+.vit svg{display:block;width:100%;height:46px;margin-top:10px}
+.banner{display:flex;gap:12px;align-items:flex-start;border-radius:14px;padding:12px 16px;margin-bottom:12px;border:1px solid}
+.banner.alert{background:color-mix(in srgb,var(--bad) 10%,transparent);border-color:color-mix(in srgb,var(--bad) 40%,transparent)}
+.banner.watch{background:color-mix(in srgb,var(--warn) 10%,transparent);border-color:color-mix(in srgb,var(--warn) 40%,transparent)}
+.banner.ok{background:color-mix(in srgb,var(--good) 8%,transparent);border-color:color-mix(in srgb,var(--good) 30%,transparent)}
+.banner b{display:block;font-size:13.5px}.banner span{font-size:12.5px;color:var(--ink2)}
+.flags{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.flag{display:grid;grid-template-columns:110px 1fr;gap:10px;font-size:12.5px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.flag .d{color:var(--muted)}
+/* healthspan */
+.hs{display:grid;grid-template-columns:1.1fr 1fr;gap:12px;margin-bottom:12px}
+.hs .big{display:flex;gap:18px;align-items:center}
+.hs .age{font-size:56px;font-weight:800;letter-spacing:-2px;line-height:1}
+.hs .age small{font-size:14px;color:var(--muted);font-weight:500;letter-spacing:0;margin-left:4px}
+.hs .pace{font-size:40px;font-weight:800;letter-spacing:-1.5px;line-height:1}
+.hstable{width:100%;border-collapse:collapse;font-size:13px}
+.hstable th{font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 8px;border-bottom:1px solid var(--line2)}
+.hstable td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:middle;text-align:left}
+.hstable td.n,.hstable th.n{text-align:right;font-variant-numeric:tabular-nums}
+.imp{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.imp .b{height:6px;border-radius:999px;width:70px;background:var(--line);position:relative;overflow:hidden}
+.imp .b i{position:absolute;top:0;bottom:0;background:var(--good)}
+.imp .b i.pos{background:var(--bad)}
+.imp .y{min-width:52px;text-align:right;font-weight:650}
+.imp .y.pos{color:var(--bad)}.imp .y.neg{color:var(--good)}
+.na{color:var(--muted);font-style:italic}
+.setform{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-top:10px}
+.setform label{font-size:11px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.setform input,.setform select{padding:7px 9px;border:1px solid var(--line2);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-size:13px;width:130px}
+.setform button{padding:8px 12px;border:0;border-radius:8px;background:var(--ink);color:var(--bg);font:inherit;font-weight:600;cursor:pointer}
+.btn2{padding:8px 12px;border:1px solid var(--line2);border-radius:9px;background:var(--panel2);color:var(--ink);font:inherit;font-weight:600;cursor:pointer;font-size:12.5px}
+@media (max-width:980px){.vgrid{grid-template-columns:repeat(2,1fr)}.hs{grid-template-columns:1fr}}
+/* print: health report */
+#reportPrint{display:none}
+@media print{
+  body{background:#fff;color:#000}
+  header.top,main>*:not(#reportPrint),#askBtn,#ask{display:none !important}
+  #reportPrint{display:block !important;font:11px/1.4 Inter,system-ui,sans-serif;color:#000}
+  #reportPrint h1{font-size:18px;margin:0 0 2px}#reportPrint h2{font-size:13px;margin:14px 0 6px;border-bottom:1px solid #999;padding-bottom:3px}
+  #reportPrint table{width:100%;border-collapse:collapse;font-size:10px}#reportPrint th,#reportPrint td{border-bottom:1px solid #ddd;padding:3px 5px;text-align:right}#reportPrint th:first-child,#reportPrint td:first-child{text-align:left}
+  #reportPrint .meta{color:#555;font-size:10px}
+}
 /* coach note */
 .note{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,transparent),transparent 60%),var(--panel2);border:1px solid color-mix(in srgb,var(--accent) 30%,var(--line));border-radius:14px;padding:16px 18px;margin:4px 0 18px}
 .note .nh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px}
@@ -208,7 +261,7 @@ th:first-child,td:first-child{text-align:left}
 <header class="top"><div class="in">
   <div class="brand"><i></i>Health OS</div>
   <span class="synced" id="synced"></span>
-  <nav class="nav" id="nav" style="margin-left:8px"><a href="#report">Report</a><a href="#patterns">Patterns</a><a href="#training">Training</a><a href="#charts">Charts</a></nav>
+  <nav class="nav" id="nav" style="margin-left:8px"><a href="#report">Report</a><a href="#vitals">Vitals</a><a href="#healthspan">Healthspan</a><a href="#patterns">Patterns</a><a href="#training">Training</a><a href="#charts">Charts</a></nav>
   <span class="spacer"></span>
   <div class="seg" id="range">
     <button data-d="7">7d</button><button data-d="30" class="on">30d</button><button data-d="90">90d</button><button data-d="180">6mo</button><button data-d="365">1y</button><button data-d="0">All</button>
@@ -259,6 +312,29 @@ th:first-child,td:first-child{text-align:left}
       <div class="rule" id="weekRule"></div>
       <div class="foot">Effect sizes are differences in your own average recovery between days with and without each factor. "Strong" means the gap is unlikely to be noise (t ≥ 2.5); "moderate" t ≥ 1.7. Patterns, not diagnoses.</div>
     </section>
+
+    <section class="card story" id="vitals">
+      <div class="head"><h2>Health Monitor</h2><span class="sub" id="vitScope">Each morning's vitals against your own prior-30-day typical range</span><span class="spacer"></span><button class="btn2" id="printBtn">Download health report (PDF)</button></div>
+      <div id="vitBanner"></div>
+      <div class="vgrid" id="vgrid"></div>
+      <div class="drv" style="margin-top:12px"><h3>Recent flags (last 30 days)</h3><div class="flags" id="flags"></div></div>
+      <div class="foot">Typical range = 5th–95th percentile of your previous 30 mornings. Watch = past that range in the unhealthy direction; Alert = more than 2.5 standard deviations out, or three or more vitals off at once (the illness signature). Not a diagnosis — a prompt to pay attention.</div>
+    </section>
+
+    <section class="card story" id="healthspan">
+      <div class="head"><h2>Healthspan</h2><span class="sub">An approximation of WHOOP's Health Age built from published mortality research, on your last 6 months</span></div>
+      <div class="hs">
+        <div class="drv"><div class="big"><div><div class="eyebrow">Health Age</div><div class="age" id="hsAge">–</div><div class="sub" id="hsAgeSub"></div></div><div style="border-left:1px solid var(--line2);padding-left:18px"><div class="eyebrow">Pace of aging</div><div class="pace" id="hsPace">–</div><div class="sub" id="hsPaceSub">last 30 days vs 6-month</div></div></div>
+          <p class="sub" style="margin-top:12px" id="hsSummary"></p></div>
+        <div class="drv"><h3>Your details (the API doesn't provide these)</h3>
+          <form class="setform" id="setform"><label>Date of birth<input type="date" id="sBirth"></label><label>Sex<select id="sSex"><option value="">–</option><option value="male">Male</option><option value="female">Female</option></select></label><label>Steps / day (avg)<input type="number" id="sSteps" placeholder="optional"></label><label>Lean mass (kg)<input type="number" step="0.1" id="sLean" placeholder="optional"></label><button type="submit">Save</button><span class="sub" id="setmsg"></span></form>
+          <p class="sub" style="margin-top:10px">Steps and lean mass aren't in the WHOOP API; add them if you track them elsewhere. VO₂ max is estimated from your resting and max heart rate.</p></div>
+      </div>
+      <div class="drv"><table class="hstable"><thead><tr><th>Metric</th><th>Your 6-month value</th><th>Target</th><th class="n">Years</th></tr></thead><tbody id="hsRows"></tbody></table>
+        <div class="foot" id="hsMethod">Each metric's effect is translated from published all-cause-mortality hazard ratios into years (Gompertz slope ≈ 0.09/yr), with caps, then summed — the same approach WHOOP describes, with our own coefficients. Negative years = younger. Directionally comparable to WHOOP Age, not identical.</div></div>
+    </section>
+
+    <section id="reportPrint"></section>
 
     <section class="card story" id="patterns">
       <div class="head"><h2>Patterns in detail</h2><span class="sub" id="storyScope"></span></div>
@@ -357,7 +433,7 @@ const dayDiff = (a, b) => Math.round((new Date(b + "T12:00:00") - new Date(a + "
 const fmtDay = (d) => new Date(d + "T12:00:00").toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
 const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-let DAYS = [], WORKOUTS = [], range = 30, charts = {}, booted = false;
+let DAYS = [], WORKOUTS = [], HM = [], SETTINGS = {}, PROFILE = {}, range = 30, charts = {}, booted = false;
 
 // ---------- theme ----------
 try { const t = localStorage.getItem("hos-theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
@@ -379,11 +455,15 @@ async function boot() {
   $("#auth").classList.add("hidden"); $("#app").classList.remove("hidden"); $("#signout").classList.remove("hidden");
   $("#askBtn").classList.remove("hidden");
   sb.from("notes").select("week_start,title,body_md,highlights,created_at").order("week_start", { ascending: false }).limit(1).then(({ data }) => { if (data?.[0]) renderNote(data[0]); });
-  const [d, w, s] = await Promise.all([
+  const [d, w, s, hmq, stq, prq] = await Promise.all([
     sb.from("daily_with_baselines").select("*").order("day", { ascending: true }).limit(5000),
-    sb.from("workouts").select("start_at,end_at,tz_offset,sport_name,strain,avg_hr,max_hr,kilojoule,score_state").order("start_at", { ascending: true }).limit(5000),
+    sb.from("workouts").select("start_at,end_at,tz_offset,sport_name,strain,avg_hr,max_hr,kilojoule,score_state,zone_one_ms,zone_two_ms,zone_three_ms,zone_four_ms,zone_five_ms").order("start_at", { ascending: true }).limit(5000),
     sb.from("sync_log").select("ran_at,ok").eq("ok", true).order("ran_at", { ascending: false }).limit(1),
+    sb.from("health_monitor").select("*").order("day", { ascending: true }).limit(5000),
+    sb.from("settings").select("*").eq("id", 1).maybeSingle(),
+    sb.from("profile").select("max_hr,height_m,weight_kg").limit(1).maybeSingle(),
   ]);
+  HM = hmq.data || []; SETTINGS = stq.data || {}; PROFILE = prq.data || {};
   if (d.error) { $("#app").innerHTML = `<p>Could not load data: ${d.error.message}</p>`; return; }
   DAYS = (d.data || []).filter(r => r.recovery_score != null || r.strain != null);
   WORKOUTS = w.data || [];
@@ -402,6 +482,8 @@ function render() {
   hero(latest, base);
   story(latest);
   analyst(rows, latest);
+  vitals();
+  healthspan();
   training(rows);
   const cr = chartRows(rows), weekly = cr !== rows;
   document.querySelectorAll(".gran").forEach(e => e.textContent = weekly ? " · weekly averages" : "");
@@ -726,6 +808,111 @@ function analyst(rows, latest) {
   $("#week").innerHTML = [1, 2, 3, 4, 5, 6, 0].map(k => { const kind = hardDays.has(k) ? "Hard" : easyDays.has(k) ? "Recover" : "Moderate"; const tgt = kind === "Hard" ? "14–17" : kind === "Moderate" ? "10–13" : "≤ 8"; const act = kind === "Hard" ? bestHard : kind === "Moderate" ? bestMod : bestEasy; const d = new Date(monday); d.setDate(monday.getDate() + [1, 2, 3, 4, 5, 6, 0].indexOf(k)); const past = d.toISOString().slice(0, 10) < todayKey; return `<div class="day" style="--dt:${colors[kind]};${past ? "opacity:.45" : ""}"><div class="dn">${WD[k]} ${d.getDate()}${d.toISOString().slice(0, 10) === todayKey ? " · today" : ""}</div><div class="dk">${kind}</div><div class="ds">strain ${tgt}<br>${act}<br><span style="color:var(--muted)">your ${WD[k]} avg: ${f0(mean(wd[k] || []))}</span></div></div>`; }).join("");
   $("#weekRule").innerHTML = `<b>Morning override:</b> wake up green → do the day as planned (or upgrade one level); yellow → hold the plan but cap at the lower end; red → drop to Recover regardless of what's scheduled. Hard days land on your historically best mornings (${order.slice(0, 2).map(x => WD[x.k]).join(" & ")}); recovery days on your worst (${order.slice(-2).map(x => WD[x.k]).join(" & ")}).`;
 }
+
+// ---- health monitor ----
+const VITALS = [
+  { k: "rhr", lbl: "Resting heart rate", unit: "bpm", st: "rhr_status", lo: "rhr_lo", hi: "rhr_hi", med: "rhr_med", f: f0, badDir: "high" },
+  { k: "hrv_rmssd_ms", lbl: "HRV (rMSSD)", unit: "ms", st: "hrv_status", lo: "hrv_lo", hi: "hrv_hi", med: "hrv_med", f: f0, badDir: "low" },
+  { k: "respiratory_rate", lbl: "Respiratory rate", unit: "brpm", st: "rr_status", lo: "rr_lo", hi: "rr_hi", med: "rr_med", f: f1, badDir: "high" },
+  { k: "spo2_pct", lbl: "Blood oxygen", unit: "%", st: "spo2_status", lo: "spo2_lo", hi: "spo2_hi", med: "spo2_med", f: f1, badDir: "low" },
+  { k: "skin_temp_c", lbl: "Skin temperature", unit: "°C", st: "st_status", lo: "st_lo", hi: "st_hi", med: "st_med", f: f1, badDir: "high" },
+];
+const STATUS_WORD = { ok: "In range", watch: "Watch", alert: "Alert" };
+function vitSpark(rows, v) {
+  const pts = rows.map(r => r[v.k] == null ? null : +r[v.k]), lo = rows.map(r => r[v.lo] == null ? null : +r[v.lo]), hi = rows.map(r => r[v.hi] == null ? null : +r[v.hi]);
+  const all = [...pts, ...lo, ...hi].filter(x => x != null); if (all.length < 6) return "";
+  const W = 100, Hh = 46, min = Math.min(...all), max = Math.max(...all), span = max - min || 1, X = (i) => i / (rows.length - 1) * W, Y = (y) => 4 + (1 - (y - min) / span) * (Hh - 8);
+  const band = rows.map((r, i) => lo[i] == null || hi[i] == null ? null : [X(i), Y(hi[i]), Y(lo[i])]).filter(Boolean);
+  const bandPath = band.length ? `M${band.map(b => `${b[0]},${b[1]}`).join(" L")} L${band.slice().reverse().map(b => `${b[0]},${b[2]}`).join(" L")} Z` : "";
+  const line = pts.map((y, i) => y == null ? null : `${X(i)},${Y(y)}`).filter(Boolean).join(" ");
+  const last = rows.length - 1, c = rows[last][v.st] || "ok";
+  return `<svg viewBox="0 0 ${W} ${Hh}" preserveAspectRatio="none"><path d="${bandPath}" fill="${hexA(css("--good"), 0.12)}"/><polyline points="${line}" fill="none" stroke="${c === "ok" ? css("--ink2") : css("--" + (c === "watch" ? "warn" : "bad"))}" stroke-width="1.8" stroke-linejoin="round"/>${pts[last] != null ? `<circle cx="${X(last)}" cy="${Y(pts[last])}" r="3" fill="${c === "ok" ? css("--ink") : css("--" + (c === "watch" ? "warn" : "bad"))}"/>` : ""}</svg>`;
+}
+function vitals() {
+  if (!HM.length) { $("#vgrid").innerHTML = `<div class="sub">No vitals yet.</div>`; return; }
+  const latest = HM[HM.length - 1], last30 = HM.slice(-30);
+  $("#vitScope").textContent = `Latest morning: ${fmtDay(latest.day)} · typical range from the 30 mornings before it`;
+  const off = VITALS.filter(v => latest[v.st] && latest[v.st] !== "ok");
+  const sig = latest.deviations >= 3;
+  const bannerCls = latest.overall || "ok";
+  $("#vitBanner").innerHTML = `<div class="banner ${bannerCls}"><div><b>${bannerCls === "alert" ? (sig ? "Illness signature — three or more vitals off at once" : "Alert — a vital is well outside your range") : bannerCls === "watch" ? "Watch — something is drifting" : "All vitals in your typical range"}</b><span>${off.length ? off.map(v => `${v.lbl} ${v.f(latest[v.k])} ${v.unit} (typical ${v.f(latest[v.lo])}–${v.f(latest[v.hi])})`).join(" · ") : "Nothing to act on this morning."}${bannerCls === "alert" ? " Treat today as a recovery day, hydrate, and watch tomorrow's numbers; if it persists 2–3 mornings or you feel unwell, that's a conversation with a clinician." : ""}</span></div></div>`;
+  $("#vgrid").innerHTML = VITALS.map(v => { const st = latest[v.st] || "ok"; return `<div class="vit" style="--vs:${st === "ok" ? "var(--good)" : st === "watch" ? "var(--warn)" : "var(--bad)"}"><div class="lbl">${v.lbl}</div><div class="v">${v.f(latest[v.k])}<small>${v.unit}</small></div><div class="rng">typical ${v.f(latest[v.lo])}–${v.f(latest[v.hi])} · median ${v.f(latest[v.med])}</div><span class="pill ${st}">${STATUS_WORD[st]}</span>${vitSpark(last30, v)}</div>`; }).join("");
+  const flagged = last30.filter(r => r.overall && r.overall !== "ok").reverse();
+  $("#flags").innerHTML = flagged.length ? flagged.map(r => `<div class="flag"><span class="d">${fmtDay(r.day)}</span><span><span class="pill ${r.overall}" style="margin:0 8px 0 0">${STATUS_WORD[r.overall]}</span>${VITALS.filter(v => r[v.st] && r[v.st] !== "ok").map(v => `${v.lbl} ${v.f(r[v.k])}`).join(" · ")}${r.recovery_score != null ? ` <span class="d">· recovery ${f0(r.recovery_score)}</span>` : ""}</span></div>`).join("") : `<div class="sub">No flags in the last 30 days.</div>`;
+}
+
+// ---- healthspan ----
+const STRENGTH = /weight|power|functional|crossfit|calisthen|strength|pilates|yoga/i;
+function hsMetrics(days, works) {
+  const n = days.length, weeks = Math.max(1, n / 7);
+  const z13 = works.reduce((a, w) => a + (+w.zone_one_ms || 0) + (+w.zone_two_ms || 0) + (+w.zone_three_ms || 0), 0) / 60000 / weeks;
+  const z45 = works.reduce((a, w) => a + (+w.zone_four_ms || 0) + (+w.zone_five_ms || 0), 0) / 60000 / weeks;
+  const str = works.filter(w => STRENGTH.test(w.sport_name || "")).reduce((a, w) => a + (w.end_at ? (new Date(w.end_at) - new Date(w.start_at)) / 60000 : 0), 0) / weeks;
+  const rhr = avg(days, "rhr"), sleepH = H(avg(days, "asleep_ms")), cons = avg(days, "consistency_pct");
+  const maxHr = +PROFILE.max_hr || null, vo2 = rhr && maxHr ? 15.3 * maxHr / rhr : null;
+  return { z13, z45, str, rhr, sleepH, cons, vo2, maxHr };
+}
+function ageFrom(birth) { if (!birth) return null; const b = new Date(birth), t = new Date(); return (t - b) / (365.25 * 86400000); }
+function vo2Norm(age, sex) { // approximate population medians (ml/kg/min)
+  const m = age == null ? 42 : age < 30 ? 45 : age < 40 ? 42 : age < 50 ? 39 : age < 60 ? 36 : 33; return sex === "female" ? m - 6 : m;
+}
+function hsImpacts(m, age, sex) {
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x)); const out = [];
+  const add = (name, val, target, years, note) => out.push({ name, val, target, years, note });
+  if (m.rhr != null) add("Resting heart rate", `${f0(m.rhr)} bpm`, "≤ 60 bpm", m.rhr > 60 ? clamp((m.rhr - 60) / 10 * 1.5, 0, 6) : clamp((m.rhr - 60) / 10 * 0.5, -1, 0));
+  if (m.sleepH != null) add("Sleep duration", hm(m.sleepH), "7–8 h", m.sleepH < 7 ? clamp((7 - m.sleepH) * 1.2, 0, 4) : m.sleepH > 9 ? clamp((m.sleepH - 9) * 1.0, 0, 2) : -0.5);
+  if (m.cons != null) add("Sleep consistency", `${f0(m.cons)}%`, "≥ 80%", m.cons < 80 ? clamp((80 - m.cons) / 20 * 1.5, 0, 3) : -0.5);
+  add("Zone 1–3 time", `${f0(m.z13)} min/wk`, "≥ 150 min/wk", -3.5 * Math.min(1, m.z13 / 150) - (m.z13 >= 300 ? 1 : 0));
+  add("Zone 4–5 time", `${f0(m.z45)} min/wk`, "≥ 75 min/wk", -1.5 * Math.min(1, m.z45 / 75));
+  add("Strength training", `${f0(m.str)} min/wk`, "≥ 60 min/wk", -1.5 * Math.min(1, m.str / 60));
+  if (m.vo2 != null) { const norm = vo2Norm(age, sex); add("VO₂ max (estimated)", `${f0(m.vo2)} ml/kg/min`, `≥ ${f0(norm)} (your age norm)`, clamp(-(m.vo2 - norm) / 3.5 * 1.4, -4, 4), `Uth estimate from max HR ${m.maxHr} / RHR ${f0(m.rhr)}`); }
+  const steps = +SETTINGS.steps_per_day || null; if (steps) add("Daily steps", `${steps.toLocaleString()}`, "≥ 8,000", steps < 8000 ? clamp((8000 - steps) / 8000 * 2, 0, 2) : -1, "from your settings"); else add("Daily steps", null, "≥ 8,000", null, "not in the WHOOP API — add in settings");
+  const lean = +SETTINGS.lean_mass_kg || null, wt = +PROFILE.weight_kg || null; if (lean && wt) { const pct = lean / wt * 100, tgt = sex === "female" ? 68 : 75; add("Lean body mass", `${f0(pct)}% of body weight`, `≥ ${tgt}%`, pct >= tgt ? -1 : clamp((tgt - pct) / 10, 0, 2), "from your settings"); } else add("Lean body mass", null, sex === "female" ? "≥ 68%" : "≥ 75%", null, "not in the WHOOP API — add in settings");
+  return out;
+}
+function healthspan() {
+  const d180 = lastNDays(182), d30 = lastNDays(30);
+  const wk = (n) => { const from = lastNDays(n)[0]?.day; return WORKOUTS.filter(w => w.score_state !== "PENDING_SCORE" && w.start_at.slice(0, 10) >= from); };
+  const age = ageFrom(SETTINGS.birth_date), sex = SETTINGS.sex || null;
+  const I180 = hsImpacts(hsMetrics(d180, wk(182)), age, sex), I30 = hsImpacts(hsMetrics(d30, wk(30)), age, sex);
+  const sum = (I) => I.reduce((a, x) => a + (x.years || 0), 0);
+  const s180 = sum(I180), s30 = sum(I30), pace = Math.max(-1, Math.min(3, 1 + 2 * (s30 - s180)));
+  $("#hsAge").innerHTML = age ? `${(age + s180).toFixed(1)}<small>yrs</small>` : `${s180 >= 0 ? "+" : ""}${s180.toFixed(1)}<small>yrs vs. your age</small>`;
+  $("#hsAgeSub").textContent = age ? `chronological ${age.toFixed(1)} · ${s180 >= 0 ? "+" : ""}${s180.toFixed(1)} yrs from habits` : "add your date of birth below for the full number";
+  $("#hsPace").innerHTML = `${pace.toFixed(2)}<small style="font-size:14px;color:var(--muted);font-weight:500">×</small>`;
+  $("#hsPaceSub").textContent = pace > 1.05 ? "aging faster than the clock right now" : pace < 0.95 ? (pace < 0 ? "reversing — recent habits beat your 6-month norm" : "slowing") : "steady";
+  const worst = [...I180].filter(x => x.years != null).sort((a, b) => b.years - a.years)[0], best = [...I180].filter(x => x.years != null).sort((a, b) => a.years - b.years)[0];
+  $("#hsSummary").innerHTML = worst && best ? `Biggest cost: <b>${worst.name}</b> (${worst.years >= 0 ? "+" : ""}${worst.years.toFixed(1)} yrs). Biggest asset: <b>${best.name}</b> (${best.years.toFixed(1)} yrs). Net ${s180 >= 0 ? "+" : ""}${s180.toFixed(1)} years over the last 6 months; the last 30 days alone would net ${s30 >= 0 ? "+" : ""}${s30.toFixed(1)}.` : "";
+  const maxAbs = Math.max(...I180.map(x => Math.abs(x.years || 0)), 1);
+  $("#hsRows").innerHTML = I180.map(x => `<tr><td>${x.name}${x.note ? `<div class="sub">${x.note}</div>` : ""}</td><td>${x.val == null ? `<span class="na">—</span>` : x.val}</td><td>${x.target}</td><td class="n">${x.years == null ? `<span class="na">n/a</span>` : `<div class="imp"><div class="b"><i class="${x.years > 0 ? "pos" : ""}" style="left:${x.years > 0 ? 50 : 50 - Math.abs(x.years) / maxAbs * 50}%;width:${Math.abs(x.years) / maxAbs * 50}%"></i></div><span class="y ${x.years > 0 ? "pos" : x.years < 0 ? "neg" : ""}">${x.years > 0 ? "+" : ""}${x.years.toFixed(1)} yrs</span></div>`}</td></tr>`).join("");
+  // settings form
+  $("#sBirth").value = SETTINGS.birth_date || ""; $("#sSex").value = SETTINGS.sex || ""; $("#sSteps").value = SETTINGS.steps_per_day || ""; $("#sLean").value = SETTINGS.lean_mass_kg || "";
+}
+$("#setform").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const payload = { id: 1, birth_date: $("#sBirth").value || null, sex: $("#sSex").value || null, steps_per_day: +$("#sSteps").value || null, lean_mass_kg: +$("#sLean").value || null, updated_at: new Date().toISOString() };
+  const { error } = await sb.from("settings").upsert(payload);
+  $("#setmsg").textContent = error ? error.message : "Saved"; if (!error) { SETTINGS = payload; healthspan(); }
+});
+
+// ---- health report (print) ----
+function buildReport() {
+  const d90 = lastNDays(90), d30 = lastNDays(30), hm30 = HM.slice(-30);
+  const row = (lab, a, b) => `<tr><td>${lab}</td><td>${a}</td><td>${b}</td></tr>`;
+  const vit = VITALS.map(v => { const l = HM[HM.length - 1]; return `<tr><td>${v.lbl}</td><td>${v.f(l[v.k])} ${v.unit}</td><td>${v.f(l[v.lo])}–${v.f(l[v.hi])}</td><td>${v.f(avg(hm30, v.k))}</td><td>${v.f(avg(HM.slice(-90), v.k))}</td><td>${STATUS_WORD[l[v.st]] || "–"}</td></tr>`; }).join("");
+  const flags = HM.slice(-90).filter(r => r.overall === "alert").reverse().slice(0, 12).map(r => `<tr><td>${r.day}</td><td>${VITALS.filter(v => r[v.st] && r[v.st] !== "ok").map(v => `${v.lbl} ${v.f(r[v.k])}`).join("; ")}</td><td>${f0(r.recovery_score)}</td></tr>`).join("");
+  $("#reportPrint").innerHTML = `<h1>Health report</h1><div class="meta">Generated ${new Date().toLocaleDateString()} · WHOOP data via Health OS · ${PROFILE.height_m ? `height ${(+PROFILE.height_m * 100).toFixed(0)} cm · ` : ""}${PROFILE.weight_kg ? `weight ${(+PROFILE.weight_kg).toFixed(1)} kg · ` : ""}max HR ${PROFILE.max_hr || "–"} bpm</div>
+  <h2>Nightly vitals (latest morning ${HM[HM.length - 1]?.day})</h2><table><thead><tr><th>Vital</th><th>Latest</th><th>Typical range</th><th>30-day avg</th><th>90-day avg</th><th>Status</th></tr></thead><tbody>${vit}</tbody></table>
+  <h2>Recovery, sleep and training</h2><table><thead><tr><th></th><th>Last 30 days</th><th>Last 90 days</th></tr></thead><tbody>
+  ${row("Recovery score (avg)", f0(avg(d30, "recovery_score")), f0(avg(d90, "recovery_score")))}${row("Green / red mornings", `${d30.filter(r => zoneOf(+r.recovery_score) === "good").length} / ${d30.filter(r => zoneOf(+r.recovery_score) === "bad").length}`, `${d90.filter(r => zoneOf(+r.recovery_score) === "good").length} / ${d90.filter(r => zoneOf(+r.recovery_score) === "bad").length}`)}
+  ${row("Sleep per night (avg)", hm(H(avg(d30, "asleep_ms"))), hm(H(avg(d90, "asleep_ms"))))}${row("Sleep need (avg)", hm(H(mean(d30.map(needMs)))), hm(H(mean(d90.map(needMs)))))}${row("Sleep performance", f0(avg(d30, "performance_pct")) + "%", f0(avg(d90, "performance_pct")) + "%")}${row("Sleep consistency", f0(avg(d30, "consistency_pct")) + "%", f0(avg(d90, "consistency_pct")) + "%")}
+  ${row("Deep / REM per night", `${hm(H(avg(d30, "sws_ms")))} / ${hm(H(avg(d30, "rem_ms")))}`, `${hm(H(avg(d90, "sws_ms")))} / ${hm(H(avg(d90, "rem_ms")))}`)}${row("Day strain (avg)", f1(avg(d30, "strain")), f1(avg(d90, "strain")))}${row("Workouts", d30.reduce((a, r) => a + (+r.workout_count || 0), 0), d90.reduce((a, r) => a + (+r.workout_count || 0), 0))}
+  </tbody></table>
+  <h2>Alert mornings (last 90 days)</h2><table><thead><tr><th>Date</th><th>Vitals outside range</th><th>Recovery</th></tr></thead><tbody>${flags || "<tr><td colspan=3>None</td></tr>"}</tbody></table>
+  <h2>Daily log (last 30 days)</h2><table><thead><tr><th>Date</th><th>Rec</th><th>HRV</th><th>RHR</th><th>Resp</th><th>SpO₂</th><th>Temp</th><th>Sleep</th><th>Strain</th></tr></thead><tbody>${[...d30].reverse().map(r => `<tr><td>${r.day}</td><td>${f0(r.recovery_score)}</td><td>${f0(r.hrv_rmssd_ms)}</td><td>${f0(r.rhr)}</td><td>${f1(r.respiratory_rate)}</td><td>${f1(r.spo2_pct)}</td><td>${f1(r.skin_temp_c)}</td><td>${hm(H(r.asleep_ms))}</td><td>${f1(r.strain)}</td></tr>`).join("")}</tbody></table>
+  <div class="meta" style="margin-top:10px">Ranges are personal (5th–95th percentile of the prior 30 mornings). Wearable-derived estimates; not a medical record.</div>`;
+}
+$("#printBtn").onclick = () => { buildReport(); setTimeout(() => window.print(), 100); };
 
 // ---- training analysis ----
 function tzMin(off) { if (!off || off === "Z") return 0; const m = /([+-])(\d\d):(\d\d)/.exec(off); return m ? (m[1] === "-" ? -1 : 1) * (+m[2] * 60 + +m[3]) : 0; }
