@@ -208,8 +208,9 @@ th:first-child,td:first-child{text-align:left}
 /* print: health report */
 #reportPrint{display:none}
 @media print{
-  body{background:#fff;color:#000}
-  header.top,main>*:not(#reportPrint),#askBtn,#ask{display:none !important}
+  html,body{background:#fff !important;color:#000}
+  header.top,#auth,#app>*:not(#reportPrint),#askBtn,#ask{display:none !important}
+  main{padding:0;max-width:none}
   #reportPrint{display:block !important;font:11px/1.4 Inter,system-ui,sans-serif;color:#000}
   #reportPrint h1{font-size:18px;margin:0 0 2px}#reportPrint h2{font-size:13px;margin:14px 0 6px;border-bottom:1px solid #999;padding-bottom:3px}
   #reportPrint table{width:100%;border-collapse:collapse;font-size:10px}#reportPrint th,#reportPrint td{border-bottom:1px solid #ddd;padding:3px 5px;text-align:right}#reportPrint th:first-child,#reportPrint td:first-child{text-align:left}
@@ -880,7 +881,7 @@ function healthspan() {
   $("#hsAge").innerHTML = age ? `${(age + s180).toFixed(1)}<small>yrs</small>` : `${s180 >= 0 ? "+" : ""}${s180.toFixed(1)}<small>yrs vs. your age</small>`;
   $("#hsAgeSub").textContent = age ? `chronological ${age.toFixed(1)} · ${s180 >= 0 ? "+" : ""}${s180.toFixed(1)} yrs from habits` : "add your date of birth below for the full number";
   $("#hsPace").innerHTML = `${pace.toFixed(2)}<small style="font-size:14px;color:var(--muted);font-weight:500">×</small>`;
-  $("#hsPaceSub").textContent = pace > 1.05 ? "aging faster than the clock right now" : pace < 0.95 ? (pace < 0 ? "reversing — recent habits beat your 6-month norm" : "slowing") : "steady";
+  $("#hsPaceSub").textContent = (pace > 1.05 ? "faster than the clock" : pace < 0.95 ? (pace < 0 ? "reversing" : "slowing") : "steady") + " — if the last 30 days continued";
   const worst = [...I180].filter(x => x.years != null).sort((a, b) => b.years - a.years)[0], best = [...I180].filter(x => x.years != null).sort((a, b) => a.years - b.years)[0];
   $("#hsSummary").innerHTML = worst && best ? `Biggest cost: <b>${worst.name}</b> (${worst.years >= 0 ? "+" : ""}${worst.years.toFixed(1)} yrs). Biggest asset: <b>${best.name}</b> (${best.years.toFixed(1)} yrs). Net ${s180 >= 0 ? "+" : ""}${s180.toFixed(1)} years over the last 6 months; the last 30 days alone would net ${s30 >= 0 ? "+" : ""}${s30.toFixed(1)}.` : "";
   const maxAbs = Math.max(...I180.map(x => Math.abs(x.years || 0)), 1);
