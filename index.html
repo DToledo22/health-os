@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b0f14">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Health OS">
 <title>Health OS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -32,7 +39,7 @@
 html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
 a{color:inherit}
 .top{position:sticky;top:0;z-index:10;backdrop-filter:blur(12px);background:color-mix(in srgb,var(--bg) 82%,transparent);border-bottom:1px solid var(--line)}
-.top .in{max-width:1240px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.top .in{max-width:1240px;margin:0 auto;padding:calc(12px + env(safe-area-inset-top)) 24px 12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.2px;font-size:15px}
 .brand i{width:22px;height:22px;border-radius:7px;background:conic-gradient(from 210deg,var(--good),var(--hrv),var(--accent),var(--good));display:inline-block;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
 .synced{color:var(--muted);font-size:12px}
@@ -239,7 +246,7 @@ th:first-child,td:first-child{text-align:left}
 .note .hl{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
 .note .hl span{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--panel);border:1px solid var(--line2);color:var(--ink2)}
 /* ask panel */
-#askBtn{position:fixed;right:22px;bottom:22px;z-index:40;display:flex;align-items:center;gap:9px;padding:14px 22px;border-radius:999px;border:1px solid rgba(255,255,255,.28);background:linear-gradient(135deg,#34d399,#16a34a);color:#fff;font:inherit;font-size:14.5px;font-weight:700;letter-spacing:-.1px;cursor:pointer;box-shadow:0 0 0 5px color-mix(in srgb,var(--good) 30%,transparent),0 14px 34px -10px color-mix(in srgb,var(--good) 70%,transparent);animation:glow 2.6s ease-in-out infinite;transition:transform .15s}
+#askBtn{position:fixed;right:22px;bottom:calc(22px + env(safe-area-inset-bottom));z-index:40;display:flex;align-items:center;gap:9px;padding:14px 22px;border-radius:999px;border:1px solid rgba(255,255,255,.28);background:linear-gradient(135deg,#34d399,#16a34a);color:#fff;font:inherit;font-size:14.5px;font-weight:700;letter-spacing:-.1px;cursor:pointer;box-shadow:0 0 0 5px color-mix(in srgb,var(--good) 30%,transparent),0 14px 34px -10px color-mix(in srgb,var(--good) 70%,transparent);animation:glow 2.6s ease-in-out infinite;transition:transform .15s}
 #askBtn:hover{transform:translateY(-1px) scale(1.02)}
 #askBtn i{font-style:normal;font-size:16px;line-height:1}
 @keyframes glow{0%,100%{box-shadow:0 0 0 5px color-mix(in srgb,var(--good) 30%,transparent),0 14px 34px -10px color-mix(in srgb,var(--good) 70%,transparent)}50%{box-shadow:0 0 0 9px color-mix(in srgb,var(--good) 14%,transparent),0 14px 34px -10px color-mix(in srgb,var(--good) 70%,transparent)}}
@@ -290,8 +297,8 @@ th:first-child,td:first-child{text-align:left}
     <div class="brand" style="justify-content:center;margin-bottom:10px"><i></i>Health OS</div>
     <h2 style="font-size:18px">Sign in</h2>
     <p class="sub">Enter your email and we'll send a one-time login link.</p>
-    <form id="authform"><input type="email" id="email" placeholder="you@example.com" required autocomplete="email"><button class="primary" type="submit">Send login link</button></form>
-    <p class="sub" id="authmsg"></p>
+    <form id="authform"><input type="email" id="email" placeholder="you@example.com" required autocomplete="email"><input type="password" id="pw" placeholder="Password (phone app)" autocomplete="current-password" style="margin-top:0"><button class="primary" type="submit">Sign in</button></form>
+    <p class="sub" id="authmsg" style="margin-top:10px">Leave the password blank to get a one-time link by email instead. On a phone home-screen app, use the password.</p>
   </section>
 
   <section id="app" class="hidden">
@@ -350,7 +357,10 @@ th:first-child,td:first-child{text-align:left}
           <p class="sub" style="margin-top:12px" id="hsSummary"></p></div>
         <div class="drv"><h3>Your details (the API doesn't provide these)</h3>
           <form class="setform" id="setform"><label>Date of birth<input type="date" id="sBirth"></label><label>Sex<select id="sSex"><option value="">–</option><option value="male">Male</option><option value="female">Female</option></select></label><label>Steps / day (avg)<input type="number" id="sSteps" placeholder="optional"></label><label>Lean mass (kg)<input type="number" step="0.1" id="sLean" placeholder="optional"></label><button type="submit">Save</button><span class="sub" id="setmsg"></span></form>
-          <p class="sub" style="margin-top:10px">Steps and lean mass aren't in the WHOOP API; add them if you track them elsewhere. VO₂ max is estimated from your resting and max heart rate.</p></div>
+          <p class="sub" style="margin-top:10px">Steps and lean mass aren't in the WHOOP API; add them if you track them elsewhere. VO₂ max is estimated from your resting and max heart rate.</p>
+          <h3 style="margin-top:16px">Phone app password</h3>
+          <form class="setform" id="pwform"><label>New password (12+ characters)<input type="password" id="newPw" autocomplete="new-password" minlength="12" required style="width:220px"></label><button type="submit">Set password</button><span class="sub" id="pwmsg"></span></form>
+          <p class="sub" style="margin-top:8px">Home-screen apps on iPhone can't receive the email link, so set a password once and sign in with it there. Sessions stay signed in.</p></div>
       </div>
       <div class="drv"><table class="hstable"><thead><tr><th>Metric</th><th>Your 6-month value</th><th>Target</th><th class="n">Years</th></tr></thead><tbody id="hsRows"></tbody></table>
         <div class="foot" id="hsMethod">Each metric's effect is translated from published all-cause-mortality hazard ratios into years (Gompertz slope ≈ 0.09/yr), with caps, then summed — the same approach WHOOP describes, with our own coefficients. Negative years = younger. Directionally comparable to WHOOP Age, not identical.</div></div>
@@ -463,9 +473,11 @@ $("#theme").onclick = () => { const t = document.documentElement.dataset.theme =
 
 // ---------- auth ----------
 $("#authform").addEventListener("submit", async (e) => {
-  e.preventDefault(); const email = $("#email").value.trim(); $("#authmsg").textContent = "Sending…";
+  e.preventDefault(); const email = $("#email").value.trim(), pw = $("#pw").value;
+  if (pw) { $("#authmsg").textContent = "Signing in…"; const { error } = await sb.auth.signInWithPassword({ email, password: pw }); if (error) $("#authmsg").textContent = error.message; return; }
+  $("#authmsg").textContent = "Sending…";
   const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname, shouldCreateUser: false } });
-  $("#authmsg").textContent = error ? error.message : "Check your inbox and click the link.";
+  $("#authmsg").textContent = error ? error.message : "Check your inbox and click the link (open it on this device).";
 });
 $("#signout").onclick = async () => { await sb.auth.signOut(); location.reload(); };
 sb.auth.onAuthStateChange((_e, s) => { if (s) boot(); });
@@ -974,6 +986,10 @@ function healthspan() {
   // settings form
   $("#sBirth").value = SETTINGS.birth_date || ""; $("#sSex").value = SETTINGS.sex || ""; $("#sSteps").value = SETTINGS.steps_per_day || ""; $("#sLean").value = SETTINGS.lean_mass_kg || "";
 }
+$("#pwform").addEventListener("submit", async (e) => {
+  e.preventDefault(); const pw = $("#newPw").value; if (pw.length < 12) { $("#pwmsg").textContent = "Use at least 12 characters."; return; }
+  const { error } = await sb.auth.updateUser({ password: pw }); $("#pwmsg").textContent = error ? error.message : "Password set — use it in the phone app."; if (!error) $("#newPw").value = "";
+});
 $("#setform").addEventListener("submit", async (e) => {
   e.preventDefault();
   const payload = { id: 1, birth_date: $("#sBirth").value || null, sex: $("#sSex").value || null, steps_per_day: +$("#sSteps").value || null, lean_mass_kg: +$("#sLean").value || null, updated_at: new Date().toISOString() };
