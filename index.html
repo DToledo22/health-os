@@ -162,6 +162,35 @@ th:first-child,td:first-child{text-align:left}
 .nav a{font-size:12px;color:var(--ink2);text-decoration:none;padding:6px 9px;border-radius:8px}
 .nav a:hover{background:var(--panel2)}
 @media (max-width:980px){.lp{grid-template-columns:36px 1fr;gap:8px 12px}.lp>div{grid-column:2}.lp .rank{grid-column:1;grid-row:1;width:28px;height:28px;font-size:13px}.proto{grid-template-columns:1fr}.week{grid-template-columns:repeat(2,1fr)}.nav{display:none}}
+/* coach note */
+.note{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,transparent),transparent 60%),var(--panel2);border:1px solid color-mix(in srgb,var(--accent) 30%,var(--line));border-radius:14px;padding:16px 18px;margin:4px 0 18px}
+.note .nh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.note .nh b{font-size:14px}
+.note .nb{font-size:13.5px;line-height:1.6;color:var(--ink)}
+.note .nb p{margin:0 0 8px}.note .nb ul{margin:4px 0 8px 18px;padding:0}.note .nb li{margin:2px 0}
+.note .hl{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.note .hl span{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--panel);border:1px solid var(--line2);color:var(--ink2)}
+/* ask panel */
+#askBtn{position:fixed;right:20px;bottom:20px;z-index:40;display:flex;align-items:center;gap:8px;padding:11px 16px;border-radius:999px;border:1px solid var(--line2);background:var(--ink);color:var(--bg);font:inherit;font-weight:650;cursor:pointer;box-shadow:0 10px 30px -10px rgba(0,0,0,.6)}
+#ask{position:fixed;top:0;right:0;height:100dvh;width:min(440px,100vw);background:var(--panel);border-left:1px solid var(--line2);z-index:50;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease;box-shadow:-20px 0 60px -30px rgba(0,0,0,.6)}
+#ask.open{transform:none}
+#ask .ah{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+#ask .ah b{font-size:14px}
+#ask .msgs{flex:1;overflow:auto;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.msg{max-width:92%;font-size:13.5px;line-height:1.55;padding:10px 13px;border-radius:14px;white-space:pre-wrap;word-wrap:break-word}
+.msg.u{align-self:flex-end;background:var(--ink);color:var(--bg);border-bottom-right-radius:4px}
+.msg.a{align-self:flex-start;background:var(--panel2);border:1px solid var(--line);border-bottom-left-radius:4px}
+.msg.a p{margin:0 0 8px}.msg.a p:last-child{margin:0}.msg.a ul,.msg.a ol{margin:4px 0 8px 18px;padding:0}.msg.a code{font-size:12px;background:var(--line);padding:1px 4px;border-radius:4px}
+.msg.sys{align-self:center;color:var(--muted);font-size:12px;background:transparent}
+.msg details{margin-top:8px;font-size:11.5px;color:var(--muted)}.msg details pre{white-space:pre-wrap;font-size:11px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;margin:6px 0 0;max-height:160px;overflow:auto}
+#ask .sugg{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 10px}
+#ask .sugg button{font:inherit;font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid var(--line2);background:var(--panel2);color:var(--ink2);cursor:pointer}
+#ask form{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
+#ask input{flex:1;padding:10px 12px;border:1px solid var(--line2);border-radius:10px;background:var(--panel2);color:var(--ink);font:inherit}
+#ask button.send{padding:10px 14px;border:0;border-radius:10px;background:var(--ink);color:var(--bg);font:inherit;font-weight:650;cursor:pointer}
+#ask button.send:disabled{opacity:.5}
+.typing{display:inline-flex;gap:4px}.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:b 1s infinite}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,80%,100%{opacity:.3}40%{opacity:1}}
 #auth{max-width:380px;margin:12vh auto;text-align:center}
 #auth input{width:100%;padding:11px 12px;border:1px solid var(--line2);border-radius:10px;background:var(--panel2);color:var(--ink);font:inherit;margin:14px 0 10px}
 #auth button.primary{width:100%;padding:11px;border:0;border-radius:10px;background:var(--ink);color:var(--bg);font:inherit;font-weight:600;cursor:pointer}
@@ -212,6 +241,7 @@ th:first-child,td:first-child{text-align:left}
 
     <section class="card story report" id="report">
       <div class="head"><h2>Analyst report</h2><span class="sub" id="reportScope"></span></div>
+      <div class="note hidden" id="note"></div>
       <p class="summary" id="summary"></p>
       <h2 style="margin-bottom:10px">Top 5 leverage points <span class="sub" style="display:inline;font-weight:400">· ranked by recovery points you're leaving on the table each day</span></h2>
       <div class="lev" id="leverage"></div>
@@ -291,6 +321,14 @@ th:first-child,td:first-child{text-align:left}
   </section>
 </main>
 
+<button id="askBtn" class="hidden">✦ Ask</button>
+<aside id="ask" aria-hidden="true">
+  <div class="ah"><b>Ask about your data</b><span class="sub" style="margin:0">Claude · queries your database live</span><span class="spacer"></span><button class="icon" id="askClose" title="Close">✕</button></div>
+  <div class="msgs" id="msgs"></div>
+  <div class="sugg" id="sugg"></div>
+  <form id="askForm"><input id="askIn" placeholder="e.g. Why were my Octobers so red?" autocomplete="off"><button class="send" id="askSend" type="submit">Send</button></form>
+</aside>
+
 <script>
 const SUPABASE_URL = "https://xaiwglhicuguvcbycvbf.supabase.co";
 const SUPABASE_KEY = "sb_publishable_rknTc8J0VzOCwndVTv3IAA_LCHBmKoR";
@@ -335,6 +373,8 @@ sb.auth.onAuthStateChange((_e, s) => { if (s) boot(); });
 async function boot() {
   if (booted) return; booted = true;
   $("#auth").classList.add("hidden"); $("#app").classList.remove("hidden"); $("#signout").classList.remove("hidden");
+  $("#askBtn").classList.remove("hidden");
+  sb.from("notes").select("week_start,title,body_md,highlights,created_at").order("week_start", { ascending: false }).limit(1).then(({ data }) => { if (data?.[0]) renderNote(data[0]); });
   const [d, w, s] = await Promise.all([
     sb.from("daily_with_baselines").select("*").order("day", { ascending: true }).limit(5000),
     sb.from("workouts").select("start_at,end_at,tz_offset,sport_name,strain,avg_hr,max_hr,kilojoule,score_state").order("start_at", { ascending: true }).limit(5000),
@@ -505,6 +545,59 @@ function story(latest) {
   cond("Weekend vs weekday", wkday, wkend, "Weekday", "Weekend");
   const bar = (lab, v, k) => `<div class="bar"><span class="lab">${lab}</span><div class="trk"><div class="fil" style="width:${Math.max(2, v)}%;--fill:${zoneColor(v)}"></div></div><span class="n">${f0(v)} <small>n=${k}</small></span></div>`;
   $("#drivers").innerHTML = drv.length ? `<div class="drv" style="grid-column:1/-1"><h3>Average recovery under different conditions</h3><div class="bars" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px 28px">${drv.map(d => bar(d.a[0], d.a[1], d.a[2]) + bar(d.b[0], d.b[1], d.b[2])).join("")}</div></div>` : "";
+}
+
+// ---- coach's note ----
+function md(src) { // tiny markdown: paragraphs, bullets, bold, italics, inline code
+  const esc = (t) => t.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+  const inline = (t) => esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\*(.+?)\*/g, "<i>$1</i>").replace(/`(.+?)`/g, "<code>$1</code>");
+  const out = []; let list = null;
+  src.split(/\r?\n/).forEach(line => {
+    const m = /^\s*[-*•]\s+(.*)$/.exec(line), n = /^\s*\d+[.)]\s+(.*)$/.exec(line);
+    if (m || n) { if (!list) { list = m ? "ul" : "ol"; out.push(`<${list}>`); } out.push(`<li>${inline((m || n)[1])}</li>`); return; }
+    if (list) { out.push(`</${list}>`); list = null; }
+    if (/^\s*#+\s*/.test(line)) { out.push(`<p><b>${inline(line.replace(/^\s*#+\s*/, ""))}</b></p>`); return; }
+    if (line.trim()) out.push(`<p>${inline(line)}</p>`);
+  });
+  if (list) out.push(`</${list}>`);
+  return out.join("");
+}
+function renderNote(n) {
+  const el = $("#note"); el.classList.remove("hidden");
+  const wk = new Date(n.week_start + "T12:00:00").toLocaleDateString([], { month: "short", day: "numeric" });
+  el.innerHTML = `<div class="nh"><b>Coach's note</b><span class="sub" style="margin:0">week of ${wk} · written by Claude from the week's data</span></div><div class="nb">${md(n.body_md)}</div>${Array.isArray(n.highlights) && n.highlights.length ? `<div class="hl">${n.highlights.map(h => `<span>${md(String(h)).replace(/<\/?p>/g, "")}</span>`).join("")}</div>` : ""}`;
+}
+
+// ---- ask panel ----
+const ASK_URL = SUPABASE_URL + "/functions/v1/whoop-chat";
+const chat = { history: [], busy: false };
+const SUGGESTIONS = ["What's the story of my last 30 days?", "Which workouts leave me greenest the next morning?", "How does my sleep on weekends compare to weekdays?", "What should this week look like given my recovery?", "When was my best 2-week stretch and what was I doing?"];
+function openAsk() { $("#ask").classList.add("open"); $("#ask").setAttribute("aria-hidden", "false"); if (!chat.history.length) { addMsg("sys", "Ask anything about your WHOOP data. Claude writes and runs the queries, then explains the numbers."); renderSugg(); } setTimeout(() => $("#askIn").focus(), 250); }
+function closeAsk() { $("#ask").classList.remove("open"); $("#ask").setAttribute("aria-hidden", "true"); }
+$("#askBtn").onclick = openAsk; $("#askClose").onclick = closeAsk;
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeAsk(); });
+function renderSugg() { $("#sugg").innerHTML = chat.history.length ? "" : SUGGESTIONS.map(q => `<button type="button">${q}</button>`).join(""); $("#sugg").querySelectorAll("button").forEach(b => b.onclick = () => ask(b.textContent)); }
+function addMsg(kind, html) { const d = document.createElement("div"); d.className = "msg " + kind; d.innerHTML = html; $("#msgs").appendChild(d); $("#msgs").scrollTop = 1e9; return d; }
+$("#askForm").addEventListener("submit", (e) => { e.preventDefault(); const q = $("#askIn").value.trim(); if (q) { $("#askIn").value = ""; ask(q); } });
+async function ask(q) {
+  if (chat.busy) return; chat.busy = true; $("#askSend").disabled = true;
+  chat.history.push({ role: "user", content: q }); addMsg("u", q.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]))); renderSugg();
+  const wait = addMsg("a", `<span class="typing"><i></i><i></i><i></i></span>`);
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const r = await fetch(ASK_URL, { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + session?.access_token, "apikey": SUPABASE_KEY }, body: JSON.stringify({ messages: chat.history.slice(-10) }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      wait.className = "msg sys";
+      wait.innerHTML = j.error === "not_configured" ? `Ask isn't switched on yet. In Supabase → Edge Functions → Secrets, add <code>ANTHROPIC_API_KEY</code> and this panel comes alive.` : `Couldn't get an answer (${j.error || r.status}${j.message ? ": " + j.message : ""}).`;
+      chat.history.pop();
+    } else {
+      chat.history.push({ role: "assistant", content: j.answer });
+      const qs = (j.queries || []).filter(x => x.sql);
+      wait.innerHTML = md(j.answer || "(no answer)") + (qs.length ? `<details><summary>${qs.length} quer${qs.length === 1 ? "y" : "ies"} run</summary>${qs.map(x => `<pre>${(x.purpose ? "-- " + x.purpose + "\n" : "") + x.sql.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]))}${x.error ? "\n-- ERROR: " + x.error : "\n-- " + x.rows + " rows"}</pre>`).join("")}</details>` : "");
+    }
+  } catch (e) { wait.className = "msg sys"; wait.textContent = "Network error: " + e.message; chat.history.pop(); }
+  chat.busy = false; $("#askSend").disabled = false; $("#msgs").scrollTop = 1e9;
 }
 
 // ---- analyst engine ----
