@@ -784,7 +784,7 @@ function analyst(rows, latest) {
   const gapMin = mean(win.filter(r => r.asleep_ms != null && needMs(r) != null && r.asleep_ms < needMs(r) * 0.9).map(r => (needMs(r) - r.asleep_ms) / 60000));
   const bedLo = bedMed - 30, bedHi = bedMed + 15;
   const bedWindowHits = (set) => set.filter(r => r.bedtime_min != null && r.bedtime_min >= bedLo && r.bedtime_min <= bedHi).length;
-  const F = [
+  const FACTORS = [
     { id: "sleep", group: "sleep", title: "Sleeping under your need", split: r => r.asleep_ms != null && needMs(r) != null ? r.asleep_ms < needMs(r) * 0.9 : null, out: rec,
       fix: () => `<b>Lights out ${Math.round(Math.min(gapMin || 60, 90) / 15) * 15} min earlier</b> on weeknights. Nothing else you track moves recovery as much.`,
       watch: () => { const h = last7.filter(r => r.asleep_ms != null && needMs(r) != null && r.asleep_ms >= needMs(r) * 0.95).length; return { m: "Nights meeting sleep need", cur: `${h}/7`, tg: "≥ 5 of 7", st: h >= 5 ? "ok" : h >= 3 ? "warn" : "bad" }; }, rule: () => `Sleep ≥ your need on 5 of 7 nights` },
@@ -824,7 +824,7 @@ function analyst(rows, latest) {
   ];
   // evaluate
   const nOut = win.filter(r => rec(r) != null).length;
-  const evald = F.map(f => {
+  const evald = FACTORS.map(f => {
     const bad = [], good = [];
     win.forEach(r => { const s = f.split(r); if (s == null) return; const o = f.out(r); if (o == null) return; (s ? bad : good).push(o); });
     if (bad.length < 8 || good.length < 8) return null;
