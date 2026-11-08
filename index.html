@@ -7,6 +7,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/svg+xml" href="icons/mark.svg">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -41,7 +42,7 @@ a{color:inherit}
 .top{position:sticky;top:0;z-index:10;backdrop-filter:blur(12px);background:color-mix(in srgb,var(--bg) 82%,transparent);border-bottom:1px solid var(--line)}
 .top .in{max-width:1240px;margin:0 auto;padding:calc(12px + env(safe-area-inset-top)) 24px 12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.2px;font-size:15px}
-.brand i{width:22px;height:22px;border-radius:7px;background:conic-gradient(from 210deg,var(--good),var(--hrv),var(--accent),var(--good));display:inline-block;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+.brand img.mark{height:24px;width:auto;display:block}
 .synced{color:var(--muted);font-size:12px}
 .spacer{flex:1}
 .seg{display:inline-flex;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
@@ -222,6 +223,8 @@ th:first-child,td:first-child{text-align:left}
   #reportPrint h1{font-size:18px;margin:0 0 2px}#reportPrint h2{font-size:13px;margin:14px 0 6px;border-bottom:1px solid #999;padding-bottom:3px}
   #reportPrint table{width:100%;border-collapse:collapse;font-size:10px}#reportPrint th,#reportPrint td{border-bottom:1px solid #ddd;padding:3px 5px;text-align:right}#reportPrint th:first-child,#reportPrint td:first-child{text-align:left}
   #reportPrint .meta{color:#555;font-size:10px}
+  #reportPrint .rhead{display:flex;align-items:center;gap:12px;margin-bottom:8px}#reportPrint .rmark{height:42px;width:auto}
+  #reportPrint .rwm{position:fixed;left:50%;top:50%;width:52%;transform:translate(-50%,-50%);opacity:.06;z-index:-1}
 }
 /* goals */
 .goals{display:grid;grid-template-columns:1.1fr 1fr;gap:12px;margin:4px 0 18px}
@@ -281,7 +284,7 @@ th:first-child,td:first-child{text-align:left}
 </head>
 <body>
 <header class="top"><div class="in">
-  <div class="brand"><i></i>Health OS</div>
+  <div class="brand"><img class="mark" src="icons/mark.svg" alt="">Health OS</div>
   <span class="synced" id="synced"></span>
   <nav class="nav" id="nav" style="margin-left:8px"><a href="#report">Report</a><a href="#vitals">Vitals</a><a href="#healthspan">Healthspan</a><a href="#training">Training</a><a href="#charts">Trends</a></nav>
   <span class="spacer"></span>
@@ -294,7 +297,7 @@ th:first-child,td:first-child{text-align:left}
 
 <main>
   <section id="auth" class="card">
-    <div class="brand" style="justify-content:center;margin-bottom:10px"><i></i>Health OS</div>
+    <div style="text-align:center;margin:6px 0 16px"><img src="icons/mark-grid.svg" alt="" style="height:96px;width:auto"><div class="brand" style="justify-content:center;margin-top:12px;font-size:17px">Health OS</div></div>
     <h2 style="font-size:18px">Sign in</h2>
     <p class="sub">Enter your email and we'll send a one-time login link.</p>
     <form id="authform"><input type="email" id="email" placeholder="you@example.com" required autocomplete="email"><input type="password" id="pw" placeholder="Password (phone app)" autocomplete="current-password" style="margin-top:0"><button class="primary" type="submit">Sign in</button></form>
@@ -1005,7 +1008,7 @@ function buildReport() {
   const row = (lab, a, b) => `<tr><td>${lab}</td><td>${a}</td><td>${b}</td></tr>`;
   const vit = VITALS.map(v => { const l = HM[HM.length - 1]; return `<tr><td>${v.lbl}</td><td>${v.f(l[v.k])} ${v.unit}</td><td>${v.f(l[v.lo])}–${v.f(l[v.hi])}</td><td>${v.f(avg(hm30, v.k))}</td><td>${v.f(avg(HM.slice(-90), v.k))}</td><td>${STATUS_WORD[l[v.st]] || "–"}</td></tr>`; }).join("");
   const flags = HM.slice(-90).filter(r => r.overall === "alert").reverse().slice(0, 12).map(r => `<tr><td>${r.day}</td><td>${VITALS.filter(v => r[v.st] && r[v.st] !== "ok").map(v => `${v.lbl} ${v.f(r[v.k])}`).join("; ")}</td><td>${f0(r.recovery_score)}</td></tr>`).join("");
-  $("#reportPrint").innerHTML = `<h1>Health report</h1><div class="meta">Generated ${new Date().toLocaleDateString()} · WHOOP data via Health OS · ${PROFILE.height_m ? `height ${ftin(PROFILE.height_m)} · ` : ""}${PROFILE.weight_kg ? `weight ${LB(PROFILE.weight_kg).toFixed(0)} lb · ` : ""}max HR ${PROFILE.max_hr || "–"} bpm</div>
+  $("#reportPrint").innerHTML = `<img class="rwm" src="icons/mark-grid.svg" alt=""><div class="rhead"><img class="rmark" src="icons/mark-grid.svg" alt=""><div><h1>Health report</h1><div class="meta">Generated ${new Date().toLocaleDateString()} · WHOOP data via Health OS · ${PROFILE.height_m ? `height ${ftin(PROFILE.height_m)} · ` : ""}${PROFILE.weight_kg ? `weight ${LB(PROFILE.weight_kg).toFixed(0)} lb · ` : ""}max HR ${PROFILE.max_hr || "–"} bpm</div></div></div>
   <h2>Nightly vitals (latest morning ${HM[HM.length - 1]?.day})</h2><table><thead><tr><th>Vital</th><th>Latest</th><th>Typical range</th><th>30-day avg</th><th>90-day avg</th><th>Status</th></tr></thead><tbody>${vit}</tbody></table>
   <h2>Recovery, sleep and training</h2><table><thead><tr><th></th><th>Last 30 days</th><th>Last 90 days</th></tr></thead><tbody>
   ${row("Recovery score (avg)", f0(avg(d30, "recovery_score")), f0(avg(d90, "recovery_score")))}${row("Green / red mornings", `${d30.filter(r => zoneOf(+r.recovery_score) === "good").length} / ${d30.filter(r => zoneOf(+r.recovery_score) === "bad").length}`, `${d90.filter(r => zoneOf(+r.recovery_score) === "good").length} / ${d90.filter(r => zoneOf(+r.recovery_score) === "bad").length}`)}
