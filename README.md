@@ -10,12 +10,14 @@ Source for the sync function and schema lives in the Supabase project (`supabase
 
 ## Why the spiral
 
-The Health OS mark is a golden spiral. It comes from the golden ratio — a proportion found everywhere in nature, from seashells to sunflowers to the way our own bodies are built. What makes it special is balance: every part relates to the whole in exactly the right measure. Nothing is too much, nothing is too little, and each turn of the spiral grows from the one before it without ever losing its shape.
+The Health OS mark is a golden spiral, drawn from the golden ratio.
 
-That's how we think about health.
+The golden ratio is a proportion that shows up all over nature — in seashells, flowers, and the human body. Its defining quality is balance: every part is in proportion to the whole. Nothing is too much, nothing is too little, and the spiral grows turn by turn without ever losing its shape.
 
-Health isn't one number. Sleep, recovery, training, heart rate, stress — they all pull on each other, and pushing hard on one usually costs you somewhere else. Real progress comes from getting the proportions right, not from maxing out any single part.
+We chose it because that is how health works.
 
-And the right proportions are yours alone. The ratio is the same in every shell, but every shell is a different size. Your sleep need, your recovery rhythm, your tolerance for load are specific to you, so the only fair comparison is against your own baseline — never against an average, a leaderboard, or someone else's week.
+**Health is a whole, not a single number.** Sleep, recovery, training, and stress all affect one another. Push too hard on one and another pays for it. Progress comes from keeping them in proportion, not from maxing out any one of them.
 
-So the spiral is a reminder, every time you open the app: look at the whole picture, find the balance that fits your body, and let it grow turn by turn.
+**The right proportion is personal.** Every seashell follows the same ratio, but no two are the same size. In the same way, your sleep need, your recovery pace, and how much training you can absorb are specific to you. That's why Health OS measures you against your own baseline — not an average, and not anyone else.
+
+The spiral is the reminder: look at the whole picture, find the balance that fits your body, and let it grow one turn at a time.
