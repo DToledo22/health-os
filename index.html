@@ -356,7 +356,7 @@ th:first-child,td:first-child{text-align:left}
         <div class="drv"><div class="big"><div><div class="eyebrow">Health Age</div><div class="age" id="hsAge">–</div><div class="sub" id="hsAgeSub"></div></div><div style="border-left:1px solid var(--line2);padding-left:18px"><div class="eyebrow">Pace of aging</div><div class="pace" id="hsPace">–</div><div class="sub" id="hsPaceSub">last 30 days vs 6-month</div></div></div>
           <p class="sub" style="margin-top:12px" id="hsSummary"></p></div>
         <div class="drv"><h3>Your details (the API doesn't provide these)</h3>
-          <form class="setform" id="setform"><label>Date of birth<input type="date" id="sBirth"></label><label>Sex<select id="sSex"><option value="">–</option><option value="male">Male</option><option value="female">Female</option></select></label><label>Steps / day (avg)<input type="number" id="sSteps" placeholder="optional"></label><label>Lean mass (kg)<input type="number" step="0.1" id="sLean" placeholder="optional"></label><button type="submit">Save</button><span class="sub" id="setmsg"></span></form>
+          <form class="setform" id="setform"><label>Date of birth<input type="date" id="sBirth"></label><label>Sex<select id="sSex"><option value="">–</option><option value="male">Male</option><option value="female">Female</option></select></label><label>Steps / day (avg)<input type="number" id="sSteps" placeholder="optional"></label><label>Lean mass (lb)<input type="number" step="0.1" id="sLean" placeholder="optional"></label><button type="submit">Save</button><span class="sub" id="setmsg"></span></form>
           <p class="sub" style="margin-top:10px">Steps and lean mass aren't in the WHOOP API; add them if you track them elsewhere. VO₂ max is estimated from your resting and max heart rate.</p>
           <h3 style="margin-top:16px">Phone app password</h3>
           <form class="setform" id="pwform"><label>New password (12+ characters)<input type="password" id="newPw" autocomplete="new-password" minlength="12" required style="width:220px"></label><button type="submit">Set password</button><span class="sub" id="pwmsg"></span></form>
@@ -455,6 +455,9 @@ const f1 = (n) => n == null || isNaN(n) ? "–" : Number(n).toFixed(1);
 const hm = (h) => h == null ? "–" : `${Math.floor(h)}h ${String(Math.round((h % 1) * 60)).padStart(2, "0")}m`;
 const clock = (min) => { if (min == null) return "–"; const m = ((min % 1440) + 1440) % 1440; const hh = Math.floor(m / 60), mm = Math.round(m % 60); const ap = hh >= 12 ? "pm" : "am"; return `${((hh + 11) % 12) + 1}:${String(mm).padStart(2, "0")}${ap}`; };
 const bedClock = (bmin) => clock(bmin + 18 * 60);
+const F = (c) => c == null ? null : +c * 9 / 5 + 32;          // °C → °F
+const LB = (kg) => kg == null ? null : +kg * 2.20462;         // kg → lb
+const ftin = (m) => { if (m == null) return "–"; const inches = +m / 0.0254; const ft = Math.floor(inches / 12); return `${ft}'${Math.round(inches - ft * 12)}"`; };
 const zoneOf = (r) => r == null ? null : r >= 67 ? "good" : r >= 34 ? "warn" : "bad";
 const zoneColor = (r) => { const z = zoneOf(r); return z ? css("--" + z) : css("--muted"); };
 const mean = (a) => { const v = a.filter(x => x != null && !isNaN(x)).map(Number); return v.length ? v.reduce((s, x) => s + x, 0) / v.length : null; };
@@ -832,7 +835,7 @@ function analyst(rows, latest) {
       watch: () => { const m = avg(last7, "respiratory_rate"); return { m: "Respiratory rate (7d)", cur: f1(m), tg: `≤ ${f1(rrMed + 0.5)}`, st: m == null ? "" : m <= rrMed + 0.5 ? "ok" : m <= rrMed + 1 ? "warn" : "bad" }; }, rule: () => `Overnight breathing rate within +0.5 of your baseline (${f1(rrMed)})` },
     { id: "temp", group: "physio", title: "Nights with elevated skin temperature", split: r => r.skin_temp_c == null || stMed == null ? null : +r.skin_temp_c > stMed + 0.5, out: rec,
       fix: () => `Elevated skin temp nights point to <b>illness, alcohol, or a hot room</b>. Cool the bedroom and log what else was going on.`,
-      watch: () => { const m = avg(last7, "skin_temp_c"); return { m: "Skin temp (7d)", cur: f1(m) + "°", tg: `≤ ${f1(stMed + 0.3)}°`, st: m == null ? "" : m <= stMed + 0.3 ? "ok" : "warn" }; }, rule: () => `Skin temperature near baseline` },
+      watch: () => { const m = avg(last7, "skin_temp_c"); return { m: "Skin temp (7d)", cur: m == null ? "–" : F(m).toFixed(1) + "°F", tg: `≤ ${F(stMed + 0.3).toFixed(1)}°F`, st: m == null ? "" : m <= stMed + 0.3 ? "ok" : "warn" }; }, rule: () => `Skin temperature near baseline` },
     { id: "tz", group: "travel", title: "Timezone changes (travel days)", split: r => { const p = prv(r); return p && p.tz_offset && r.tz_offset ? p.tz_offset !== r.tz_offset : null; }, out: rec,
       fix: () => `On travel days: <b>anchor your wake time, get daylight early, skip the late session</b>, and don't chase strain for 48 h.`,
       watch: () => { let n = 0; for (let i = 1; i < last14.length; i++) if (last14[i].tz_offset !== last14[i - 1].tz_offset) n++; return { m: "Timezone changes (14d)", cur: `${n}`, tg: "–", st: n === 0 ? "ok" : "warn" }; }, rule: () => `Travel days get a recovery protocol, not a workout` },
@@ -913,7 +916,7 @@ const VITALS = [
   { k: "hrv_rmssd_ms", lbl: "HRV (rMSSD)", unit: "ms", st: "hrv_status", lo: "hrv_lo", hi: "hrv_hi", med: "hrv_med", f: f0, badDir: "low" },
   { k: "respiratory_rate", lbl: "Respiratory rate", unit: "brpm", st: "rr_status", lo: "rr_lo", hi: "rr_hi", med: "rr_med", f: f1, badDir: "high" },
   { k: "spo2_pct", lbl: "Blood oxygen", unit: "%", st: "spo2_status", lo: "spo2_lo", hi: "spo2_hi", med: "spo2_med", f: f1, badDir: "low" },
-  { k: "skin_temp_c", lbl: "Skin temperature", unit: "°C", st: "st_status", lo: "st_lo", hi: "st_hi", med: "st_med", f: f1, badDir: "high" },
+  { k: "skin_temp_c", lbl: "Skin temperature", unit: "°F", st: "st_status", lo: "st_lo", hi: "st_hi", med: "st_med", f: (v) => v == null ? "–" : F(v).toFixed(1), badDir: "high" },
 ];
 const STATUS_WORD = { ok: "In range", watch: "Watch", alert: "Alert" };
 function vitSpark(rows, v) {
@@ -984,7 +987,7 @@ function healthspan() {
   const maxAbs = Math.max(...I180.map(x => Math.abs(x.years || 0)), 1);
   $("#hsRows").innerHTML = I180.map(x => `<tr><td>${x.name}${x.note ? `<div class="sub">${x.note}</div>` : ""}</td><td>${x.val == null ? `<span class="na">—</span>` : x.val}</td><td>${x.target}</td><td class="n">${x.years == null ? `<span class="na">n/a</span>` : `<div class="imp"><div class="b"><i class="${x.years > 0 ? "pos" : ""}" style="left:${x.years > 0 ? 50 : 50 - Math.abs(x.years) / maxAbs * 50}%;width:${Math.abs(x.years) / maxAbs * 50}%"></i></div><span class="y ${x.years > 0 ? "pos" : x.years < 0 ? "neg" : ""}">${x.years > 0 ? "+" : ""}${x.years.toFixed(1)} yrs</span></div>`}</td></tr>`).join("");
   // settings form
-  $("#sBirth").value = SETTINGS.birth_date || ""; $("#sSex").value = SETTINGS.sex || ""; $("#sSteps").value = SETTINGS.steps_per_day || ""; $("#sLean").value = SETTINGS.lean_mass_kg || "";
+  $("#sBirth").value = SETTINGS.birth_date || ""; $("#sSex").value = SETTINGS.sex || ""; $("#sSteps").value = SETTINGS.steps_per_day || ""; $("#sLean").value = SETTINGS.lean_mass_kg ? LB(SETTINGS.lean_mass_kg).toFixed(1) : "";
 }
 $("#pwform").addEventListener("submit", async (e) => {
   e.preventDefault(); const pw = $("#newPw").value; if (pw.length < 12) { $("#pwmsg").textContent = "Use at least 12 characters."; return; }
@@ -992,7 +995,7 @@ $("#pwform").addEventListener("submit", async (e) => {
 });
 $("#setform").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const payload = { id: 1, birth_date: $("#sBirth").value || null, sex: $("#sSex").value || null, steps_per_day: +$("#sSteps").value || null, lean_mass_kg: +$("#sLean").value || null, updated_at: new Date().toISOString() };
+  const payload = { id: 1, birth_date: $("#sBirth").value || null, sex: $("#sSex").value || null, steps_per_day: +$("#sSteps").value || null, lean_mass_kg: +$("#sLean").value ? +$("#sLean").value / 2.20462 : null, updated_at: new Date().toISOString() };
   const { error } = await sb.from("settings").upsert(payload);
   $("#setmsg").textContent = error ? error.message : "Saved"; if (!error) { SETTINGS = payload; healthspan(); }
 });
@@ -1003,7 +1006,7 @@ function buildReport() {
   const row = (lab, a, b) => `<tr><td>${lab}</td><td>${a}</td><td>${b}</td></tr>`;
   const vit = VITALS.map(v => { const l = HM[HM.length - 1]; return `<tr><td>${v.lbl}</td><td>${v.f(l[v.k])} ${v.unit}</td><td>${v.f(l[v.lo])}–${v.f(l[v.hi])}</td><td>${v.f(avg(hm30, v.k))}</td><td>${v.f(avg(HM.slice(-90), v.k))}</td><td>${STATUS_WORD[l[v.st]] || "–"}</td></tr>`; }).join("");
   const flags = HM.slice(-90).filter(r => r.overall === "alert").reverse().slice(0, 12).map(r => `<tr><td>${r.day}</td><td>${VITALS.filter(v => r[v.st] && r[v.st] !== "ok").map(v => `${v.lbl} ${v.f(r[v.k])}`).join("; ")}</td><td>${f0(r.recovery_score)}</td></tr>`).join("");
-  $("#reportPrint").innerHTML = `<h1>Health report</h1><div class="meta">Generated ${new Date().toLocaleDateString()} · WHOOP data via Health OS · ${PROFILE.height_m ? `height ${(+PROFILE.height_m * 100).toFixed(0)} cm · ` : ""}${PROFILE.weight_kg ? `weight ${(+PROFILE.weight_kg).toFixed(1)} kg · ` : ""}max HR ${PROFILE.max_hr || "–"} bpm</div>
+  $("#reportPrint").innerHTML = `<h1>Health report</h1><div class="meta">Generated ${new Date().toLocaleDateString()} · WHOOP data via Health OS · ${PROFILE.height_m ? `height ${ftin(PROFILE.height_m)} · ` : ""}${PROFILE.weight_kg ? `weight ${LB(PROFILE.weight_kg).toFixed(0)} lb · ` : ""}max HR ${PROFILE.max_hr || "–"} bpm</div>
   <h2>Nightly vitals (latest morning ${HM[HM.length - 1]?.day})</h2><table><thead><tr><th>Vital</th><th>Latest</th><th>Typical range</th><th>30-day avg</th><th>90-day avg</th><th>Status</th></tr></thead><tbody>${vit}</tbody></table>
   <h2>Recovery, sleep and training</h2><table><thead><tr><th></th><th>Last 30 days</th><th>Last 90 days</th></tr></thead><tbody>
   ${row("Recovery score (avg)", f0(avg(d30, "recovery_score")), f0(avg(d90, "recovery_score")))}${row("Green / red mornings", `${d30.filter(r => zoneOf(+r.recovery_score) === "good").length} / ${d30.filter(r => zoneOf(+r.recovery_score) === "bad").length}`, `${d90.filter(r => zoneOf(+r.recovery_score) === "good").length} / ${d90.filter(r => zoneOf(+r.recovery_score) === "bad").length}`)}
@@ -1011,7 +1014,7 @@ function buildReport() {
   ${row("Deep / REM per night", `${hm(H(avg(d30, "sws_ms")))} / ${hm(H(avg(d30, "rem_ms")))}`, `${hm(H(avg(d90, "sws_ms")))} / ${hm(H(avg(d90, "rem_ms")))}`)}${row("Day strain (avg)", f1(avg(d30, "strain")), f1(avg(d90, "strain")))}${row("Workouts", d30.reduce((a, r) => a + (+r.workout_count || 0), 0), d90.reduce((a, r) => a + (+r.workout_count || 0), 0))}
   </tbody></table>
   <h2>Alert mornings (last 90 days)</h2><table><thead><tr><th>Date</th><th>Vitals outside range</th><th>Recovery</th></tr></thead><tbody>${flags || "<tr><td colspan=3>None</td></tr>"}</tbody></table>
-  <h2>Daily log (last 30 days)</h2><table><thead><tr><th>Date</th><th>Rec</th><th>HRV</th><th>RHR</th><th>Resp</th><th>SpO₂</th><th>Temp</th><th>Sleep</th><th>Strain</th></tr></thead><tbody>${[...d30].reverse().map(r => `<tr><td>${r.day}</td><td>${f0(r.recovery_score)}</td><td>${f0(r.hrv_rmssd_ms)}</td><td>${f0(r.rhr)}</td><td>${f1(r.respiratory_rate)}</td><td>${f1(r.spo2_pct)}</td><td>${f1(r.skin_temp_c)}</td><td>${hm(H(r.asleep_ms))}</td><td>${f1(r.strain)}</td></tr>`).join("")}</tbody></table>
+  <h2>Daily log (last 30 days)</h2><table><thead><tr><th>Date</th><th>Rec</th><th>HRV</th><th>RHR</th><th>Resp</th><th>SpO₂</th><th>Temp °F</th><th>Sleep</th><th>Strain</th></tr></thead><tbody>${[...d30].reverse().map(r => `<tr><td>${r.day}</td><td>${f0(r.recovery_score)}</td><td>${f0(r.hrv_rmssd_ms)}</td><td>${f0(r.rhr)}</td><td>${f1(r.respiratory_rate)}</td><td>${f1(r.spo2_pct)}</td><td>${r.skin_temp_c == null ? "–" : F(r.skin_temp_c).toFixed(1)}</td><td>${hm(H(r.asleep_ms))}</td><td>${f1(r.strain)}</td></tr>`).join("")}</tbody></table>
   <div class="meta" style="margin-top:10px">Ranges are personal (5th–95th percentile of the prior 30 mornings). Wearable-derived estimates; not a medical record.</div>`;
 }
 $("#printBtn").onclick = () => { buildReport(); setTimeout(() => window.print(), 100); };

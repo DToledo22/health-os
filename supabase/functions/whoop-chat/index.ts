@@ -24,7 +24,7 @@ DATA MODEL (schema "whoop", query views directly, no schema prefix needed):
 - workouts: id, start_at, end_at, tz_offset, sport_name, score_state, strain, avg_hr, max_hr, kilojoule, distance_m, altitude_gain_m, zone_zero_ms..zone_five_ms. A workout belongs to the cycle whose [start_at, end_at) contains its start_at.
 - notes: week_start, title, body_md, highlights (prior coach's notes).\n- settings: goals (json array, first = primary), event_name, event_date, birth_date, sex, steps_per_day, lean_mass_kg.
 WHOOP semantics: a cycle starts at sleep onset and ends at the next sleep onset; the recovery score is computed from the sleep at the START of the cycle, so "day" = the morning he woke up. The newest row is "today" (it may still be open: end_at null). Compare like with like: use the person's own baselines, not population norms.
-SQL rules: Postgres, single SELECT/WITH statement, no semicolons, at most 200 rows (aggregate rather than dumping rows). Local time = start_at + tz_offset interval. Round numbers sensibly. Today's date (UTC): ${new Date().toISOString().slice(0, 10)}.`;
+UNITS: David is American — report skin temperature in °F (°C × 9/5 + 32), body weight in lb (kg × 2.205), height in ft/in, distances in miles; VO2 max stays in ml/kg/min. The database stores °C and kg.\nSQL rules: Postgres, single SELECT/WITH statement, no semicolons, at most 200 rows (aggregate rather than dumping rows). Local time = start_at + tz_offset interval. Round numbers sensibly. Today's date (UTC): ${new Date().toISOString().slice(0, 10)}.`;
 
 const TOOLS = [{
   name: "run_sql",
