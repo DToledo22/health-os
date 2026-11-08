@@ -10,12 +10,12 @@ Source for the sync function and schema lives in the Supabase project (`supabase
 
 ## Why the spiral
 
-The Health OS mark is a golden spiral — the curve you get when you cut a square off a golden rectangle, then a square off what's left, and keep going. Every turn is the same shape as the last, just bigger.
+The Health OS mark is a golden spiral. It comes from the golden ratio — a proportion found everywhere in nature, from seashells to sunflowers to the way our own bodies are built. What makes it special is balance: every part relates to the whole in exactly the right measure. Nothing is too much, nothing is too little, and each turn of the spiral grows from the one before it without ever losing its shape.
 
-That's the idea the app is built on, in three parts:
+That's how we think about health.
 
-1. **Proportion, not maximums.** The golden ratio is the one split where the whole relates to the big part exactly as the big part relates to the small one — nothing dominates, nothing is wasted. Health works the same way: not the most training, not the most rest, but the right proportion of strain to sleep to recovery, measured against *your* baseline rather than a population average.
-2. **Growth without distortion.** A nautilus adds a chamber and stays a nautilus. That's healthspan — getting older without getting worse — and it's how the dashboard works: one more night, one more session, compounding on what came before.
-3. **It's never finished.** The spiral has no last turn. There's always the next morning's number, which is why the mark is a curve and not a closed shape.
+Health isn't one number. Sleep, recovery, training, heart rate, stress — they all pull on each other, and pushing hard on one usually costs you somewhere else. Real progress comes from getting the proportions right, not from maxing out any single part.
 
-The same mark appears everywhere — home-screen icon, app header, sign-in screen and the printed report — so the thing you tap and the thing you read are visibly one system.
+And the right proportions are yours alone. The ratio is the same in every shell, but every shell is a different size. Your sleep need, your recovery rhythm, your tolerance for load are specific to you, so the only fair comparison is against your own baseline — never against an average, a leaderboard, or someone else's week.
+
+So the spiral is a reminder, every time you open the app: look at the whole picture, find the balance that fits your body, and let it grow turn by turn.
