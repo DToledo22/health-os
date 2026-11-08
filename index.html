@@ -126,7 +126,7 @@ th:first-child,td:first-child{text-align:left}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:1px}
 
 /* analyst */
-.report .summary{font-size:14.5px;line-height:1.6;color:var(--ink);max-width:90ch;margin:4px 0 16px}
+.report .summary{font-size:13px;line-height:1.6;color:var(--ink2);margin:4px 0 16px}
 .report .summary b{font-weight:650}
 .lev{display:flex;flex-direction:column;gap:10px}
 .lp{display:grid;grid-template-columns:44px 1.25fr 1fr 1fr;gap:14px;align-items:start;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
@@ -283,7 +283,7 @@ th:first-child,td:first-child{text-align:left}
 <header class="top"><div class="in">
   <div class="brand"><i></i>Health OS</div>
   <span class="synced" id="synced"></span>
-  <nav class="nav" id="nav" style="margin-left:8px"><a href="#report">Report</a><a href="#vitals">Vitals</a><a href="#healthspan">Healthspan</a><a href="#patterns">Patterns</a><a href="#training">Training</a><a href="#charts">Charts</a></nav>
+  <nav class="nav" id="nav" style="margin-left:8px"><a href="#report">Report</a><a href="#vitals">Vitals</a><a href="#healthspan">Healthspan</a><a href="#training">Training</a><a href="#charts">Trends</a></nav>
   <span class="spacer"></span>
   <div class="seg" id="range">
     <button data-d="7">7d</button><button data-d="30" class="on">30d</button><button data-d="90">90d</button><button data-d="180">6mo</button><button data-d="365">1y</button><button data-d="0">All</button>
@@ -312,8 +312,8 @@ th:first-child,td:first-child{text-align:left}
           <div class="target">Suggested strain today <b id="targetStrain">–</b><span id="targetNote"></span></div>
         </div>
       </div>
-      <div class="card tile"><div class="lbl">HRV (rMSSD)</div><div class="v" id="tHrv">–</div><span class="chip" id="dHrv"></span><svg class="spark" id="sHrv"></svg></div>
-      <div class="card tile"><div class="lbl">Resting heart rate</div><div class="v" id="tRhr">–</div><span class="chip" id="dRhr"></span><svg class="spark" id="sRhr"></svg></div>
+      <div class="card tile" style="cursor:pointer" onclick="document.getElementById('vitals').scrollIntoView({behavior:'smooth'})"><div class="lbl">Vitals this morning</div><div class="v" id="tVit">–</div><span class="chip" id="dVit"></span><svg class="spark" id="sVit"></svg></div>
+      <div class="card tile" style="cursor:pointer" onclick="document.getElementById('training').scrollIntoView({behavior:'smooth'})"><div class="lbl">Training load ratio</div><div class="v" id="tLoad">–</div><span class="chip" id="dLoad"></span><svg class="spark" id="sLoad"></svg></div>
       <div class="card tile"><div class="lbl">Sleep last night</div><div class="v" id="tSleep">–</div><span class="chip" id="dSleep"></span><svg class="spark" id="sSleep"></svg></div>
       <div class="card tile"><div class="lbl">Day strain</div><div class="v" id="tStrain">–</div><span class="chip" id="dStrain"></span><svg class="spark" id="sStrain"></svg></div>
     </div>
@@ -346,6 +346,7 @@ th:first-child,td:first-child{text-align:left}
       <div class="head"><h2>Health Monitor</h2><span class="sub" id="vitScope">Each morning's vitals against your own prior-30-day typical range</span><span class="spacer"></span><button class="btn2" id="printBtn">Download health report (PDF)</button></div>
       <div id="vitBanner"></div>
       <div class="vgrid" id="vgrid"></div>
+      <div class="drv hidden" id="vitExpand" style="margin-top:12px"><div class="ch"><div><h2 id="vitExpTitle"></h2><div class="sub">Daily value · shaded = your typical range at the time · dashed = 30-day median<span class="gran"></span></div></div><button class="btn2" id="vitExpClose">Close</button></div><div class="chart" id="cVital"><canvas></canvas></div></div>
       <div class="drv" style="margin-top:12px"><h3>Recent flags (last 30 days)</h3><div class="flags" id="flags"></div></div>
       <div class="foot">Typical range = 5th–95th percentile of your previous 30 mornings. Watch = past that range in the unhealthy direction; Alert = more than 2.5 standard deviations out, or three or more vitals off at once (the illness signature). Not a diagnosis — a prompt to pay attention.</div>
     </section>
@@ -368,16 +369,8 @@ th:first-child,td:first-child{text-align:left}
 
     <section id="reportPrint"></section>
 
-    <section class="card story" id="patterns">
-      <div class="head"><h2>Patterns in detail</h2><span class="sub" id="storyScope"></span></div>
-      <div class="insights" id="insights"></div>
-      <div class="drivers" id="drivers"></div>
-      <div class="foot">Patterns from your own history, not medical advice. Comparisons need ≥ 5 days in each group to be shown.</div>
-    </section>
-
     <section class="card story" id="training">
       <div class="head"><h2>Training analysis</h2><span class="sub" id="trainScope"></span></div>
-      <div class="insights" id="trainInsights" style="margin-bottom:14px"></div>
       <div class="grid" style="margin-bottom:12px">
         <div class="drv">
           <h3>Training load ratio — this week vs. your 4-week norm</h3>
@@ -402,16 +395,6 @@ th:first-child,td:first-child{text-align:left}
         <div class="legend"><span><i style="background:var(--good)"></i>Green</span><span><i style="background:var(--warn)"></i>Yellow</span><span><i style="background:var(--bad)"></i>Red</span><span><i class="l" style="background:var(--ink2)"></i>7-day avg</span></div>
         <div class="chart" id="cRecovery"><canvas></canvas></div>
       </div>
-      <div class="card">
-        <div class="ch"><div><h2>Heart rate variability</h2><div class="sub">ms<span class="gran"></span></div></div><div class="kpi" id="kHrv"></div></div>
-        <div class="legend"><span><i style="background:var(--hrv)"></i>HRV</span><span><i class="l" style="background:var(--ink2)"></i>7d</span><span><i class="l" style="background:var(--muted)"></i>30d</span></div>
-        <div class="chart" id="cHrv"><canvas></canvas></div>
-      </div>
-      <div class="card">
-        <div class="ch"><div><h2>Resting heart rate</h2><div class="sub">bpm<span class="gran"></span></div></div><div class="kpi" id="kRhr"></div></div>
-        <div class="legend"><span><i style="background:var(--rhr)"></i>RHR</span><span><i class="l" style="background:var(--ink2)"></i>7d</span><span><i class="l" style="background:var(--muted)"></i>30d</span></div>
-        <div class="chart" id="cRhr"><canvas></canvas></div>
-      </div>
       <div class="card wide">
         <div class="ch"><div><h2>Sleep</h2><div class="sub">Hours by stage · line = sleep need<span class="gran"></span></div></div><div class="kpi" id="kSleep"></div></div>
         <div class="legend"><span><i style="background:var(--sl1)"></i>Light</span><span><i style="background:var(--sl2)"></i>REM</span><span><i style="background:var(--sl3)"></i>Deep</span><span><i style="background:var(--awake)"></i>Awake</span><span><i class="l" style="background:var(--need)"></i>Need</span></div>
@@ -421,13 +404,8 @@ th:first-child,td:first-child{text-align:left}
         <div class="ch"><div><h2>Strain vs. recovery</h2><div class="sub">Each dot is a day, colored by recovery zone</div></div></div>
         <div class="chart" id="cScatter"><canvas></canvas></div>
       </div>
-      <div class="card">
-        <div class="ch"><div><h2>Training</h2><div class="sub">Sessions by activity in range</div></div><div class="kpi" id="kWork"></div></div>
-        <div class="chart" id="cWorkouts"><canvas></canvas></div>
-      </div>
-      <div class="card wide">
-        <h2>Weekly rollup</h2><div class="sub">Averages per week (Mon–Sun)</div>
-        <div style="overflow:auto"><table id="weekly"><thead><tr><th>Week of</th><th>Days</th><th>Recovery</th><th>HRV</th><th>RHR</th><th>Strain</th><th>Sleep</th><th>Sleep perf</th><th>Sessions</th></tr></thead><tbody></tbody></table></div>
+      <div class="card wide"><details><summary style="cursor:pointer;list-style:none"><h2 style="display:inline">Weekly rollup</h2> <span class="sub" style="display:inline">· averages per week (Mon–Sun) — tap to expand</span></summary>
+        <div style="overflow:auto;margin-top:10px"><table id="weekly"><thead><tr><th>Week of</th><th>Days</th><th>Recovery</th><th>HRV</th><th>RHR</th><th>Strain</th><th>Sleep</th><th>Sleep perf</th><th>Sessions</th></tr></thead><tbody></tbody></table></div></details>
       </div>
     </div>
   </section>
@@ -517,7 +495,6 @@ function render() {
   const latest = DAYS[DAYS.length - 1]; if (!latest) return;
   const base = DAYS.slice(-31, -1);
   hero(latest, base);
-  story(latest);
   renderGoals();
   analyst(rows, latest);
   vitals();
@@ -525,7 +502,7 @@ function render() {
   training(rows);
   const cr = chartRows(rows), weekly = cr !== rows;
   document.querySelectorAll(".gran").forEach(e => e.textContent = weekly ? " · weekly averages" : "");
-  recoveryChart(cr, rows); hrvChart(cr, rows); rhrChart(cr, rows); sleepChart(cr, rows); scatterChart(rows); workoutChart(rows); weeklyTable(rows);
+  recoveryChart(cr, rows); sleepChart(cr, rows); scatterChart(rows); weeklyTable(rows); vitExpanded && vitalChart(vitExpanded);
 }
 
 // ---- hero ----
@@ -563,8 +540,13 @@ function hero(l, base) {
   const g0 = goalList()[0]; if (g0 && DAYS.length) { const t = GOALS[g0].today(zoneOf(rec), goalContext()); if (t) p.line = t; }
   $("#zoneName").textContent = p.name; $("#todayLine").textContent = p.line; $("#targetStrain").textContent = p.target; $("#targetNote").textContent = p.note;
   const sp = DAYS.slice(-14);
-  $("#tHrv").innerHTML = `${f0(l.hrv_rmssd_ms)}<small>ms</small>`; chip($("#dHrv"), +l.hrv_rmssd_ms, avg(base, "hrv_rmssd_ms"), " ms", true); spark($("#sHrv"), sp.map(r => r.hrv_rmssd_ms), css("--hrv"));
-  $("#tRhr").innerHTML = `${f0(l.rhr)}<small>bpm</small>`; chip($("#dRhr"), +l.rhr, avg(base, "rhr"), " bpm", false); spark($("#sRhr"), sp.map(r => r.rhr), css("--rhr"));
+  const hmL = HM[HM.length - 1]; const vOff = hmL ? VITALS.filter(v => hmL[v.st] && hmL[v.st] !== "ok") : [];
+  const vst = hmL?.overall || "ok"; $("#tVit").innerHTML = `${5 - vOff.length}<small>/ 5 in range</small>`;
+  const dv = $("#dVit"); dv.className = "chip " + (vst === "ok" ? "good" : vst === "alert" ? "bad" : ""); dv.textContent = vst === "ok" ? "All clear" : vst === "watch" ? "Watch: " + vOff.map(v => v.lbl.split(" ")[0]).join(", ") : "Alert: " + vOff.map(v => v.lbl.split(" ")[0]).join(", ");
+  spark($("#sVit"), HM.slice(-14).map(r => r.hrv_rmssd_ms), css("--hrv"));
+  const acw = acwrSeries(DAYS), acwL = [...acw].reverse().find(v => v != null); $("#tLoad").innerHTML = acwL == null ? "–" : `${acwL.toFixed(2)}<small>× your 4-wk norm</small>`;
+  const dl = $("#dLoad"); dl.className = "chip " + (acwL == null ? "hidden" : acwL > 1.3 ? "bad" : acwL < 0.8 ? "" : "good"); dl.textContent = acwL == null ? "" : acwL > 1.3 ? "Spike — pull back" : acwL < 0.8 ? "Light week" : "Sweet spot";
+  spark($("#sLoad"), acw.slice(-14), css("--strain"));
   const sh = H(l.asleep_ms); $("#tSleep").innerHTML = sh == null ? "–" : hm(sh); chip($("#dSleep"), sh, H(avg(base, "asleep_ms")), " h", true, 1); spark($("#sSleep"), sp.map(r => H(r.asleep_ms)), css("--sl2"));
   $("#tStrain").innerHTML = `${f1(l.strain)}`; chip($("#dStrain"), +l.strain, avg(base, "strain"), "", null, 1); spark($("#sStrain"), sp.map(r => r.strain), css("--strain"));
 }
@@ -865,7 +847,7 @@ function analyst(rows, latest) {
   const sleepAvg = H(avg(win, "asleep_ms")), needAvg = H(mean(win.map(needMs))), perf = avg(win, "performance_pct");
   const h7 = +latest.hrv_7d, h30 = +latest.hrv_30d, hp = h7 && h30 ? (h7 - h30) / h30 * 100 : null;
   const gain = top.slice(0, 3).reduce((a, x, i) => a + x.impact * [1, 0.5, 0.33][i], 0);
-  $("#summary").innerHTML = `Across <b>${win.length} days</b> you averaged <b>${f0(avgRec)}% recovery</b> — green ${Math.round(green * 100)}% of mornings, red ${Math.round(red * 100)}%. You slept <b>${hm(sleepAvg)}</b> a night against a need of <b>${hm(needAvg)}</b> (sleep performance ${f0(perf)}%), and your HRV is currently ${hp == null ? "near" : hp > 5 ? `<b>${hp.toFixed(0)}% above</b>` : hp < -5 ? `<b>${Math.abs(hp).toFixed(0)}% below</b>` : "near"} its 30-day baseline. ${top.length ? `The biggest drag on your scores is <b>${top[0].title.toLowerCase()}</b>${top[1] ? `, followed by <b>${top[1].title.toLowerCase()}</b>` : ""}. Fixing the top three is worth roughly <b>+${gain.toFixed(0)} recovery points</b> on an average day — the difference between a yellow and a green morning.` : ""}`;
+  $("#summary").innerHTML = `<b>${win.length} days</b> · recovery <b>${f0(avgRec)}</b> (green ${Math.round(green * 100)}% · red ${Math.round(red * 100)}%) · sleep <b>${hm(sleepAvg)}</b> vs need ${hm(needAvg)} · HRV ${hp == null ? "near baseline" : (hp >= 0 ? "+" : "") + hp.toFixed(0) + "% vs 30d"}${top.length ? ` · fixing the top three ≈ <b>+${gain.toFixed(0)} pts</b>/day` : ""}`;
   // protocol
   const monday = new Date(); monday.setDate(monday.getDate() - (monday.getDay() + 6) % 7);
   $("#protoWeek").textContent = "· week of " + monday.toLocaleDateString([], { month: "short", day: "numeric" });
@@ -892,7 +874,6 @@ function analyst(rows, latest) {
   const r7 = +l.rhr_7d, r30 = +l.rhr_30d; wl.push({ m: "Resting HR 7-day avg", cur: f0(r7) + " bpm", tg: `≤ ${f0(r30)} (30d)`, st: r7 && r30 ? (r7 <= r30 ? "ok" : r7 <= r30 * 1.04 ? "warn" : "bad") : "" });
   const sl7 = H(avg(last7, "asleep_ms")), nd7 = H(mean(last7.map(needMs))); wl.push({ m: "Sleep 7-day avg", cur: hm(sl7), tg: `≥ ${hm(nd7)} need`, st: sl7 && nd7 ? (sl7 >= nd7 * 0.95 ? "ok" : sl7 >= nd7 * 0.85 ? "warn" : "bad") : "" });
   const seen = new Set(["HRV 7-day avg", "Resting HR 7-day avg", "Sleep 7-day avg"]);
-  if (gsel[0]) GOALS[gsel[0]].metrics(gctx).slice(0, 2).forEach(([m, cur, tg, p]) => { if (!seen.has(m) && cur != null) { seen.add(m); wl.push({ m, cur, tg, st: p == null ? "" : p >= 1 ? "ok" : p >= 0.6 ? "warn" : "bad" }); } });
   top.forEach(x => { const w = x.watch(); if (!seen.has(w.m)) { seen.add(w.m); wl.push(w); } });
   $("#pWatch").innerHTML = wl.slice(0, 7).map(w => `<div class="wl"><div><div class="m">${w.m}</div><div class="tg">target ${w.tg}</div></div><div class="cur status ${w.st}" style="margin:0"><i></i>${w.cur}</div></div>`).join("");
   // 7-day plan from weekday pattern + activity response
@@ -919,6 +900,24 @@ const VITALS = [
   { k: "skin_temp_c", lbl: "Skin temperature", unit: "°F", st: "st_status", lo: "st_lo", hi: "st_hi", med: "st_med", f: (v) => v == null ? "–" : F(v).toFixed(1), badDir: "high" },
 ];
 const STATUS_WORD = { ok: "In range", watch: "Watch", alert: "Alert" };
+let vitExpanded = null;
+function vitalChart(k) {
+  const v = VITALS.find(x => x.k === k); if (!v) return; vitExpanded = k;
+  $("#vitExpand").classList.remove("hidden"); $("#vitExpTitle").textContent = v.lbl + (v.unit ? ` (${v.unit})` : "");
+  const from = lastNDays(range)[0]?.day; const rows = HM.filter(r => !from || r.day >= from);
+  const cv = v.k === "skin_temp_c" ? (x) => x == null ? null : F(+x) : (x) => x == null ? null : +x;
+  const o = common(); o.plugins.tooltip.callbacks = { label: (i) => ` ${["value", "typical high", "typical low", "median"][i.datasetIndex]} ${v.f(v.k === "skin_temp_c" ? (i.raw - 32) * 5 / 9 : i.raw)} ${v.unit}` };
+  const color = { rhr: css("--rhr"), hrv_rmssd_ms: css("--hrv"), respiratory_rate: css("--accent"), spo2_pct: css("--sl2"), skin_temp_c: css("--strain") }[k];
+  draw("#cVital", { data: { labels: labels(rows), datasets: [
+    line(rows.map(r => cv(r[v.k])), color, { borderWidth: 2 }),
+    line(rows.map(r => cv(r[v.hi])), "transparent", { backgroundColor: hexA(css("--good"), 0.10), fill: "+1", borderWidth: 0 }),
+    line(rows.map(r => cv(r[v.lo])), "transparent", { borderWidth: 0 }),
+    line(rows.map(r => cv(r[v.med])), css("--muted"), { borderWidth: 1, borderDash: [4, 4] }),
+  ] }, options: o });
+  $("#vitExpand").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+document.addEventListener("click", (e) => { const c = e.target.closest(".vit[data-k]"); if (c) vitalChart(c.dataset.k); });
+document.addEventListener("DOMContentLoaded", () => {}); 
 function vitSpark(rows, v) {
   const pts = rows.map(r => r[v.k] == null ? null : +r[v.k]), lo = rows.map(r => r[v.lo] == null ? null : +r[v.lo]), hi = rows.map(r => r[v.hi] == null ? null : +r[v.hi]);
   const all = [...pts, ...lo, ...hi].filter(x => x != null); if (all.length < 6) return "";
@@ -937,7 +936,7 @@ function vitals() {
   const sig = latest.deviations >= 3;
   const bannerCls = latest.overall || "ok";
   $("#vitBanner").innerHTML = `<div class="banner ${bannerCls}"><div><b>${bannerCls === "alert" ? (sig ? "Illness signature — three or more vitals off at once" : "Alert — a vital is well outside your range") : bannerCls === "watch" ? "Watch — something is drifting" : "All vitals in your typical range"}</b><span>${off.length ? off.map(v => `${v.lbl} ${v.f(latest[v.k])} ${v.unit} (typical ${v.f(latest[v.lo])}–${v.f(latest[v.hi])})`).join(" · ") : "Nothing to act on this morning."}${bannerCls === "alert" ? " Treat today as a recovery day, hydrate, and watch tomorrow's numbers; if it persists 2–3 mornings or you feel unwell, that's a conversation with a clinician." : ""}</span></div></div>`;
-  $("#vgrid").innerHTML = VITALS.map(v => { const st = latest[v.st] || "ok"; return `<div class="vit" style="--vs:${st === "ok" ? "var(--good)" : st === "watch" ? "var(--warn)" : "var(--bad)"}"><div class="lbl">${v.lbl}</div><div class="v">${v.f(latest[v.k])}<small>${v.unit}</small></div><div class="rng">typical ${v.f(latest[v.lo])}–${v.f(latest[v.hi])} · median ${v.f(latest[v.med])}</div><span class="pill ${st}">${STATUS_WORD[st]}</span>${vitSpark(last30, v)}</div>`; }).join("");
+  $("#vgrid").innerHTML = VITALS.map(v => { const st = latest[v.st] || "ok"; return `<div class="vit" data-k="${v.k}" style="cursor:pointer;--vs:${st === "ok" ? "var(--good)" : st === "watch" ? "var(--warn)" : "var(--bad)"}"><div class="lbl">${v.lbl}</div><div class="v">${v.f(latest[v.k])}<small>${v.unit}</small></div><div class="rng">typical ${v.f(latest[v.lo])}–${v.f(latest[v.hi])} · median ${v.f(latest[v.med])}</div><span class="pill ${st}">${STATUS_WORD[st]}</span>${vitSpark(last30, v)}</div>`; }).join("");
   const flagged = last30.filter(r => r.overall && r.overall !== "ok").reverse();
   $("#flags").innerHTML = flagged.length ? flagged.map(r => `<div class="flag"><span class="d">${fmtDay(r.day)}</span><span><span class="pill ${r.overall}" style="margin:0 8px 0 0">${STATUS_WORD[r.overall]}</span>${VITALS.filter(v => r[v.st] && r[v.st] !== "ok").map(v => `${v.lbl} ${v.f(r[v.k])}`).join(" · ")}${r.recovery_score != null ? ` <span class="d">· recovery ${f0(r.recovery_score)}</span>` : ""}</span></div>`).join("") : `<div class="sub">No flags in the last 30 days.</div>`;
 }
@@ -1018,6 +1017,7 @@ function buildReport() {
   <div class="meta" style="margin-top:10px">Ranges are personal (5th–95th percentile of the prior 30 mornings). Wearable-derived estimates; not a medical record.</div>`;
 }
 $("#printBtn").onclick = () => { buildReport(); setTimeout(() => window.print(), 100); };
+$("#vitExpClose").onclick = () => { vitExpanded = null; $("#vitExpand").classList.add("hidden"); };
 
 // ---- training analysis ----
 function tzMin(off) { if (!off || off === "Z") return 0; const m = /([+-])(\d\d):(\d\d)/.exec(off); return m ? (m[1] === "-" ? -1 : 1) * (+m[2] * 60 + +m[3]) : 0; }
@@ -1096,7 +1096,7 @@ function training(rows) {
     const loss = (md.sleep - ev.sleep) * 60;
     ins.push({ k: "Time of day", t: loss > 0 ? `Evening sessions cost you ~${Math.round(loss)} min of sleep` : `Evening training isn't hurting your sleep`, b: `Nights after evening sessions average ${hm(ev.sleep)} vs ${hm(md.sleep)} after ${md.lab.toLowerCase()} ones (${ev.n} vs ${md.n} sessions).`, a: loss > 0 ? `When you must train late, <b>finish by 8 pm</b> and treat lights-out as fixed, not "after I wind down".` : `<b>Keep your current schedule</b> — your sleep is robust to late sessions.`, tone: loss > 20 ? "warn" : null });
   }
-  $("#trainInsights").innerHTML = ins.map(i => `<div class="ins" style="--tone:${i.tone ? `var(--${i.tone})` : "var(--line2)"}"><div class="k">${i.k}</div><div class="t">${i.t}</div><p class="b">${i.b}</p><p class="a">${i.a}</p></div>`).join("");
+  const _ti = $("#trainInsights"); if (_ti) _ti.innerHTML = ins.map(i => `<div class="ins" style="--tone:${i.tone ? `var(--${i.tone})` : "var(--line2)"}"><div class="k">${i.k}</div><div class="t">${i.t}</div><p class="b">${i.b}</p><p class="a">${i.a}</p></div>`).join("");
 }
 function bucketWeeklyVals(rows, vals) { const w = {}; rows.forEach((r, i) => (w[weekStart(r.day)] ||= []).push(vals[i])); return Object.entries(w).sort((a, b) => a[0].localeCompare(b[0])).map(([, v]) => mean(v)); }
 
