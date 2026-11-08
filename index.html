@@ -544,7 +544,7 @@ function hero(l, base) {
   const vst = hmL?.overall || "ok"; $("#tVit").innerHTML = `${5 - vOff.length}<small>/ 5 in range</small>`;
   const dv = $("#dVit"); dv.className = "chip " + (vst === "ok" ? "good" : vst === "alert" ? "bad" : ""); dv.textContent = vst === "ok" ? "All clear" : vst === "watch" ? "Watch: " + vOff.map(v => v.lbl.split(" ")[0]).join(", ") : "Alert: " + vOff.map(v => v.lbl.split(" ")[0]).join(", ");
   spark($("#sVit"), HM.slice(-14).map(r => r.hrv_rmssd_ms), css("--hrv"));
-  const acw = acwrSeries(DAYS), acwL = [...acw].reverse().find(v => v != null); $("#tLoad").innerHTML = acwL == null ? "–" : `${acwL.toFixed(2)}<small>× your 4-wk norm</small>`;
+  const acw = acwrSeries(DAYS), acwL = [...acw].reverse().find(v => v != null); $("#tLoad").innerHTML = acwL == null ? "–" : `${acwL.toFixed(2)}<small>× 4-wk norm</small>`;
   const dl = $("#dLoad"); dl.className = "chip " + (acwL == null ? "hidden" : acwL > 1.3 ? "bad" : acwL < 0.8 ? "" : "good"); dl.textContent = acwL == null ? "" : acwL > 1.3 ? "Spike — pull back" : acwL < 0.8 ? "Light week" : "Sweet spot";
   spark($("#sLoad"), acw.slice(-14), css("--strain"));
   const sh = H(l.asleep_ms); $("#tSleep").innerHTML = sh == null ? "–" : hm(sh); chip($("#dSleep"), sh, H(avg(base, "asleep_ms")), " h", true, 1); spark($("#sSleep"), sp.map(r => H(r.asleep_ms)), css("--sl2"));
